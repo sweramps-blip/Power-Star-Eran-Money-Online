@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Star - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FFD700;
+            --primary-dark: #FFA500;
+            --bg-dark: #0a0e27;
+            --bg-card: #151935;
+            --text-light: #ffffff;
+            --text-muted: #8b92b8;
+            --success: #00ff88;
+            --error: #ff4757;
+            --warning: #ffa502;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 165, 0, 0.06) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 20px 0;
+        }
+
+        .header-left h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 71, 87, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        /* Announcement Banner */
+        .announcement {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .announcement.active {
+            display: block;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .announcement-text {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '⭐';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            font-size: 180px;
+            opacity: 0.1;
+        }
+
+        .balance-label {
+            color: rgba(10, 14, 39, 0.7);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .balance-amount {
+            color: var(--bg-dark);
+            font-size: 48px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .balance-subtext {
+            color: rgba(10, 14, 39, 0.6);
+            font-size: 13px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Section Cards */
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-light);
+            font-size: 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--bg-dark);
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Referral Section */
+        .referral-code-display {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .referral-code {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--primary);
+            letter-spacing: 4px;
+            margin: 12px 0;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: var(--bg-dark);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert.success {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .alert.error {
+            background: rgba(255, 71, 87, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .alert.warning {
+            background: rgba(255, 165, 2, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(255, 165, 2, 0.3);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.linked {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--success);
+        }
+
+        .status-badge.pending {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--warning);
+        }
+
+        /* Loader */
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(10, 14, 39, 0.3);
+            border-top-color: var(--bg-dark);
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .balance-amount {
+                font-size: 36px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .referral-code {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-card {
+                padding: 20px;
+            }
+
+            .balance-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>⭐ Power Star</h1>
+                <p id="userName">Welcome back!</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+
+        <!-- Announcement -->
+        <div id="announcement" class="announcement">
+            <div class="announcement-text" id="announcementText"></div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="balance-label">Total Balance</div>
+            <div class="balance-amount">Rs. <span id="totalBalance">0</span></div>
+            <div class="balance-subtext">Available for withdrawal</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-value">Rs. <span id="level1Bonus">0</span></div>
+                <div class="stat-label">Level 1 Bonus (5%)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💎</div>
+                <div class="stat-value">Rs. <span id="level2Bonus">0</span></div>
+                <div class="stat-label">Level 2 Bonus (2%)</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🎁</div>
+                <div class="stat-value">Rs. <span id="totalBonus">0</span></div>
+                <div class="stat-label">Total Earnings</div>
+            </div>
+        </div>
+
+        <!-- Bind Wallet Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">💳</div>
+                <div>
+                    <div class="section-title">Payment Account</div>
+                    <span id="walletStatus" class="status-badge pending">Not Linked</span>
+                </div>
+            </div>
+
+            <div id="walletAlert" class="alert"></div>
+
+            <form id="walletForm" onsubmit="bindWallet(event)">
+                <div class="form-group">
+                    <label>Account Holder Name</label>
+                    <input type="text" id="accountTitle" placeholder="Ali Khan" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Account Type</label>
+                        <select id="accountType" required>
+                            <option value="">Select Type</option>
+                            <option value="JazzCash">JazzCash</option>
+                            <option value="EasyPaisa">EasyPaisa</option>
+                            <option value="Bank">Bank Account</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Account Number</label>
+                        <input type="text" id="accountNumber" placeholder="03001234567" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="walletBtn">
+                    Link Account
+                </button>
+            </form>
+        </div>
+
+        <!-- Withdrawal Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">💸</div>
+                <div class="section-title">Withdraw Funds</div>
+            </div>
+
+            <div id="withdrawAlert" class="alert"></div>
+
+            <form id="withdrawForm" onsubmit="handleWithdraw(event)">
+                <div class="form-group">
+                    <label>Withdrawal Amount (Min: Rs. 100)</label>
+                    <input type="number" id="withdrawAmount" placeholder="500" min="100" step="1" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="withdrawBtn">
+                    Withdraw Now
+                </button>
+            </form>
+        </div>
+
+        <!-- Referral Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-icon">🎯</div>
+                <div class="section-title">Your Referral Code</div>
+            </div>
+
+            <div class="referral-code-display">
+                <div style="color: var(--text-muted); font-size: 14px;">Share this code to earn bonuses</div>
+                <div class="referral-code" id="referralCode">--------</div>
+                <button class="copy-btn" onclick="copyReferralCode()">
+                    📋 Copy Code
+                </button>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.03); border-radius: 12px; padding: 16px; font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+                <strong style="color: var(--text-light);">How it works:</strong><br>
+                • When someone withdraws using your referral, you earn <strong style="color: var(--primary)">5%</strong> bonus<br>
+                • Your referrer earns <strong style="color: var(--primary)">2%</strong> bonus (Level 2)<br>
+                • Bonuses are added directly to your balance
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // REPLACE WITH YOUR GOOGLE APPS SCRIPT URL
+        const API_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+        let userData = null;
+
+        // Check if user is logged in
+        window.addEventListener('DOMContentLoaded', function() {
+            const user = localStorage.getItem('user');
+            
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            userData = JSON.parse(user);
+            loadDashboard();
+            loadAnnouncement();
+        });
+
+        async function loadDashboard() {
+            // Update UI with user data
+            document.getElementById('userName').textContent = `Welcome, ${userData.name}!`;
+            document.getElementById('totalBalance').textContent = userData.balance.toFixed(2);
+            document.getElementById('level1Bonus').textContent = userData.level1_bonus.toFixed(2);
+            document.getElementById('level2Bonus').textContent = userData.level2_bonus.toFixed(2);
+            document.getElementById('totalBonus').textContent = userData.total_bonus.toFixed(2);
+            document.getElementById('referralCode').textContent = userData.referral_code;
+
+            // Check if wallet is linked
+            if (userData.account_title && userData.account_type && userData.account_no) {
+                document.getElementById('accountTitle').value = userData.account_title;
+                document.getElementById('accountType').value = userData.account_type;
+                document.getElementById('accountNumber').value = userData.account_no;
+                
+                // Disable form
+                document.getElementById('walletForm').querySelectorAll('input, select').forEach(el => {
+                    el.disabled = true;
+                });
+                
+                document.getElementById('walletBtn').textContent = '✓ Account Linked';
+                document.getElementById('walletBtn').disabled = true;
+                document.getElementById('walletStatus').textContent = 'Linked';
+                document.getElementById('walletStatus').className = 'status-badge linked';
+            }
+
+            // Refresh data from server
+            await refreshUserData();
+        }
+
+        async function refreshUserData() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'getUserData',
+                        user_id: userData.user_id
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    userData = result.user;
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    // Update balance display
+                    document.getElementById('totalBalance').textContent = userData.balance.toFixed(2);
+                    document.getElementById('level1Bonus').textContent = userData.level1_bonus.toFixed(2);
+                    document.getElementById('level2Bonus').textContent = userData.level2_bonus.toFixed(2);
+                    document.getElementById('totalBonus').textContent = userData.total_bonus.toFixed(2);
+                }
+            } catch (error) {
+                console.error('Error refreshing data:', error);
+            }
+        }
+
+        async function loadAnnouncement() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+
+                if (result.status === 'success' && result.announcement.text) {
+                    document.getElementById('announcementText').textContent = result.announcement.text;
+                    document.getElementById('announcement').classList.add('active');
+                }
+            } catch (error) {
+                console.error('Error loading announcement:', error);
+            }
+        }
+
+        async function bindWallet(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('walletBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Linking...';
+
+            const title = document.getElementById('accountTitle').value;
+            const type = document.getElementById('accountType').value;
+            const num = document.getElementById('accountNumber').value;
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'bindWallet',
+                        user_id: userData.user_id,
+                        title: title,
+                        type: type,
+                        num: num
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('walletAlert', result.message, 'success');
+                    
+                    // Update local data
+                    userData.account_title = title;
+                    userData.account_type = type;
+                    userData.account_no = num;
+                    localStorage.setItem('user', JSON.stringify(userData));
+
+                    // Disable form
+                    document.getElementById('walletForm').querySelectorAll('input, select').forEach(el => {
+                        el.disabled = true;
+                    });
+                    
+                    btn.textContent = '✓ Account Linked';
+                    document.getElementById('walletStatus').textContent = 'Linked';
+                    document.getElementById('walletStatus').className = 'status-badge linked';
+                } else {
+                    showAlert('walletAlert', result.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                showAlert('walletAlert', 'Connection error. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        async function handleWithdraw(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('withdrawBtn');
+            const originalText = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> Processing...';
+
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'withdraw',
+                        user_id: userData.user_id,
+                        amount: amount
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    showAlert('withdrawAlert', result.message, 'success');
+                    
+                    // Update balance
+                    document.getElementById('totalBalance').textContent = result.new_balance.toFixed(2);
+                    userData.balance = result.new_balance;
+                    localStorage.setItem('user', JSON.stringify(userData));
+
+                    // Reset form
+                    document.getElementById('withdrawForm').reset();
+
+                    // Refresh data
+                    setTimeout(() => refreshUserData(), 1000);
+                } else {
+                    showAlert('withdrawAlert', result.message, 'error');
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            } catch (error) {
+                showAlert('withdrawAlert', 'Connection error. Please try again.', 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function copyReferralCode() {
+            const code = userData.referral_code;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        function showAlert(elementId, message, type) {
+            const alertBox = document.getElementById(elementId);
+            alertBox.textContent = message;
+            alertBox.className = 'alert ' + type;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
