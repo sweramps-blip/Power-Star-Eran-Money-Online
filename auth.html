@@ -155,28 +155,29 @@ async function doRegister() {
   const ref = document.getElementById("r-ref").value.trim();
   const terms = document.getElementById("terms-chk").checked;
 
-  // Basic Validation
   if(!name || !num || !pass) return Swal.fire("Rukiye!", "Saray fields bharna lazmi hain.", "warning");
   if(!terms) return Swal.fire("Terms", "T&C accept karna lazmi hy.", "info");
 
   Swal.fire({title: 'Security Check...', didOpen: () => Swal.showLoading()});
 
   try {
-    // 1. Pehle data mangwao check karne ke liye (doGet)
     const res = await fetch(API);
-    const users = await res.json();
+    const data = await res.json();
+    const users = data.users;
 
-    // 2. Check: Kya ye mobile pehle se register hy?
     if(users.some(u => u.device_id === current_device_id)) {
         return Swal.fire("Security Alert", "Is mobile par account pehle hi bana hua hy!", "error");
     }
 
-    // 3. Check: Kya ye number pehle se register hy?
     if(users.some(u => String(u.number) === num)) {
         return Swal.fire("Ghalti", "Ye number pehle se system mein hy!", "warning");
     }
 
-    // 4. Agar sab theek hy to Data Bhejo (doPost)
+    // --- ID GENERATOR LOGIC ---
+    const newIdCount = users.length + 1;
+    const auto_id = "PS" + String(newIdCount).padStart(4, '0');
+    // --------------------------
+
     const payload = {
       key: KEY,
       action: "register",
@@ -185,24 +186,28 @@ async function doRegister() {
       password: pass,
       referral: ref,
       device_id: current_device_id,
-      date: new Date().toLocaleDateString()
+      date: new Date().toLocaleDateString(),
+      user_id: auto_id // Ye Column I ke liye hy
     };
 
     fetch(API, {
       method: "POST",
-      mode: "no-cors", // GitHub/CORS bypass
+      mode: "no-cors",
       body: JSON.stringify(payload)
     }).then(() => {
-      Swal.fire("Kamyabi", "Aapka account ban gaya hy!", "success").then(() => {
-          switchTab('login'); // Registration ke baad login par bhej do
+      Swal.fire({
+        title: "Kamyabi!",
+        html: `Account ban gaya hy!<br>ID: <b style="color:#fbbf24;">${auto_id}</b>`,
+        icon: "success"
+      }).then(() => {
+          switchTab('login');
       });
     });
 
   } catch(e) {
-    Swal.fire("Error", "Server se raabta nahi ho raha. Internet check karein.", "error");
+    Swal.fire("Error", "Server issues", "error");
   }
 }
-
 </script>
 </body>
 </html>
