@@ -11,7 +11,7 @@
 
 <style>
 /* ============================================================
-   APKA ORIGINAL STYLE & DESIGN
+   APKA ORIGINAL STYLE (NO SHORTCUTS)
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Outfit', sans-serif; background: #0a0e1a; color: #fff; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -23,7 +23,7 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
 .logo-wrap p { font-size: 12px; color: #64748b; margin-top: 3px; letter-spacing: 0.5px; }
 .card { width: 100%; max-width: 380px; background: #131829; border: 1px solid #1e2a45; border-radius: 24px; padding: 28px 22px 24px; position: relative; box-shadow: 0 12px 48px rgba(0,0,0,0.35); }
 .tab-bar { display: flex; background: #0a0e1a; border-radius: 14px; padding: 4px; margin-bottom: 28px; gap: 4px; }
-.tab-btn { flex: 1; padding: 10px 0; border: none; background: transparent; color: #64748b; font-size: 14px; font-weight: 600; border-radius: 11px; cursor: pointer; transition: 0.3s ease; }
+.tab-btn { flex: 1; padding: 10px 0; border: none; background: transparent; color: #64748b; font-size: 14px; font-weight: 600; border-radius: 11px; cursor: pointer; transition: all 0.3s ease; }
 .tab-btn.active { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0a0e1a; box-shadow: 0 3px 12px rgba(251,191,36,0.3); }
 .form-panel { display: none; animation: fadeUp 0.35s ease; }
 .form-panel.active { display: block; }
@@ -38,17 +38,25 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
 .eye-toggle { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: #3d4f6e; font-size: 14px; cursor: pointer; background: none; border: none; z-index: 2; }
 .phone-prefix { position: absolute; left: 38px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 600; color: #fbbf24; pointer-events: none; }
 .input-wrap.phone input { padding-left: 78px; }
+
+/* Password Strength Restored */
 .strength-track { display: flex; gap: 5px; margin-top: 8px; height: 3px; }
 .strength-seg { flex: 1; border-radius: 3px; background: #1e2a45; transition: 0.3s; }
 .strength-seg.on-weak { background: #ef4444; }
 .strength-seg.on-medium { background: #f97316; }
 .strength-seg.on-strong { background: #22c55e; }
 .strength-label { font-size: 11px; margin-top: 5px; font-weight: 600; min-height: 16px; }
+
+/* Terms & Conditions Restored */
+.terms-row { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; cursor: pointer; }
+.terms-row input { accent-color: #fbbf24; width: 16px; height: 16px; margin-top: 2px; }
+.terms-row span { font-size: 12px; color: #64748b; line-height: 1.4; }
+.terms-row b { color: #fbbf24; text-decoration: underline; }
+
 .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border: none; border-radius: 13px; color: #0a0e1a; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 16px rgba(251,191,36,0.3); }
 .submit-btn:active { transform: scale(0.96); }
 .device-row { margin-top: 22px; text-align: center; font-size: 11px; color: #3d4f6e; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .did-value { color: #64748b; font-weight: 600; }
-.did-eye { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -67,22 +75,8 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
     </div>
 
     <div class="form-panel active" id="panel-login">
-      <div class="field">
-        <label>Phone Number</label>
-        <div class="input-wrap phone">
-          <i class="fas fa-phone input-icon"></i>
-          <span class="phone-prefix">+92</span>
-          <input type="tel" id="l-num" placeholder="3001234567">
-        </div>
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <div class="input-wrap">
-          <i class="fas fa-lock input-icon"></i>
-          <input type="password" id="l-pass" placeholder="Enter password">
-          <button class="eye-toggle" onclick="toggleEye('l-pass', this)"><i class="fas fa-eye"></i></button>
-        </div>
-      </div>
+      <div class="field"><label>Phone Number</label><div class="input-wrap phone"><i class="fas fa-phone input-icon"></i><span class="phone-prefix">+92</span><input type="tel" id="l-num" placeholder="3001234567"></div></div>
+      <div class="field"><label>Password</label><div class="input-wrap"><i class="fas fa-lock input-icon"></i><input type="password" id="l-pass" placeholder="Enter password"><button class="eye-toggle" onclick="toggleEye('l-pass', this)"><i class="fas fa-eye"></i></button></div></div>
       <button class="submit-btn" onclick="doLogin()">Login</button>
     </div>
 
@@ -91,28 +85,25 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
       <div class="field"><label>Phone Number</label><div class="input-wrap phone"><i class="fas fa-phone input-icon"></i><span class="phone-prefix">+92</span><input type="tel" id="r-num" placeholder="3001234567"></div></div>
       <div class="field">
         <label>Password</label>
-        <div class="input-wrap">
-          <i class="fas fa-lock input-icon"></i>
-          <input type="password" id="r-pass" placeholder="Create password" oninput="checkStrength()">
-          <button class="eye-toggle" onclick="toggleEye('r-pass', this)"><i class="fas fa-eye"></i></button>
-        </div>
+        <div class="input-wrap"><i class="fas fa-lock input-icon"></i><input type="password" id="r-pass" placeholder="Create password" oninput="checkStrength()"><button class="eye-toggle" onclick="toggleEye('r-pass', this)"><i class="fas fa-eye"></i></button></div>
         <div class="strength-track"><div class="strength-seg" id="seg1"></div><div class="strength-seg" id="seg2"></div><div class="strength-seg" id="seg3"></div></div>
         <div class="strength-label" id="strength-label"></div>
       </div>
       <div class="field"><label>Referral Code</label><div class="input-wrap"><i class="fas fa-tag input-icon"></i><input type="text" id="r-ref" placeholder="Optional"></div></div>
+      
+      <label class="terms-row"><input type="checkbox" id="terms-chk"><span>I agree to the <b>Terms & Conditions</b>.</span></label>
       <button class="submit-btn" onclick="doRegister()">Create Account</button>
     </div>
 
-    <div class="device-row">ID: <span class="did-value" id="did-text">######</span> <i class="fas fa-eye did-eye" onclick="toggleDID()"></i></div>
+    <div class="device-row">ID: <span class="did-value" id="did-text">######</span></div>
   </div>
 </div>
 
 <script>
-// --- CONFIG (Apna Link Update Rakhein) ---
 const API = "https://script.google.com/macros/s/AKfycbyQHYAqMZFoBCso7-ZH6f71WMormLiydqOhFkIjofUicsluTqgiiLvOiLrgm3RS-TzM/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
-// --- PURANA LOGIC: DEVICE ID ---
+// Device Protection Logic
 const current_device_id = btoa(navigator.userAgent + screen.width).substring(0, 15);
 document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
 
@@ -124,18 +115,10 @@ function switchTab(t){
 }
 
 function toggleEye(id, btn) {
-  const input = document.getElementById(id);
-  const icon = btn.querySelector("i");
-  input.type = input.type === "password" ? "text" : "password";
-  icon.classList.toggle("fa-eye"); icon.classList.toggle("fa-eye-slash");
+  const el = document.getElementById(id);
+  el.type = el.type === "password" ? "text" : "password";
 }
 
-function toggleDID() {
-  const el = document.getElementById("did-text");
-  el.innerText = el.innerText.includes("*") ? current_device_id : current_device_id.slice(0, 6) + "****";
-}
-
-// --- PURANA LOGIC: PASSWORD STRENGTH ---
 function checkStrength() {
   const p = document.getElementById("r-pass").value;
   const segs = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
@@ -147,11 +130,10 @@ function checkStrength() {
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
 
-// --- LOGIN LOGIC ---
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
-  if(!num || !pass) return Swal.fire("Tawajjo", "Fields fill karein", "warning");
+  if(!num || !pass) return Swal.fire("Wait", "Fill all fields", "warning");
 
   Swal.fire({title: 'Authenticating...', didOpen: () => Swal.showLoading()});
   try {
@@ -159,37 +141,39 @@ async function doLogin() {
     const users = await res.json();
     const user = users.find(u => String(u.number) === num && String(u.password) === pass);
 
-    if(!user) return Swal.fire("Ghalti", "Number ya Password darust nahi hy.", "error");
-    if(user.device_id !== current_device_id) return Swal.fire("Security", "Ye account kisi aur mobile par registered hy!", "error");
+    if(!user) return Swal.fire("Error", "Invalid login", "error");
+    if(user.device_id !== current_device_id) return Swal.fire("Security", "Different device detected!", "error");
 
     localStorage.setItem("ps_user", JSON.stringify(user));
-    Swal.fire("Kamyab", "Login ho gaya!", "success").then(() => window.location.href = "dashboard.html");
-  } catch(e) { Swal.fire("Error", "Server se raabta nahi ho raha.", "error"); }
+    window.location.href = "dashboard.html";
+  } catch(e) { Swal.fire("Error", "Server issues", "error"); }
 }
 
-// --- REGISTER LOGIC ---
 async function doRegister() {
-  const payload = {
-    key: KEY, action: "register",
-    name: document.getElementById("r-name").value.trim(),
-    number: document.getElementById("r-num").value.trim(),
-    password: document.getElementById("r-pass").value.trim(),
-    referral: document.getElementById("r-ref").value.trim(),
-    device_id: current_device_id,
-    date: new Date().toLocaleDateString()
-  };
+  const terms = document.getElementById("terms-chk").checked;
+  if(!terms) return Swal.fire("Terms", "Accept T&C first", "info");
 
-  if(!payload.name || !payload.number || !payload.password) return Swal.fire("Error", "Saray fields lazmi hain", "info");
+  Swal.fire({title: 'Checking Device...', didOpen: () => Swal.showLoading()});
+  try {
+    const res = await fetch(API);
+    const users = await res.json();
+    if(users.some(u => u.device_id === current_device_id)) return Swal.fire("Security", "Device already registered!", "error");
 
-  Swal.fire({title: 'Processing...', didOpen: () => Swal.showLoading()});
+    const payload = {
+      key: KEY, action: "register",
+      name: document.getElementById("r-name").value,
+      number: document.getElementById("r-num").value,
+      password: document.getElementById("r-pass").value,
+      referral: document.getElementById("r-ref").value,
+      device_id: current_device_id,
+      date: new Date().toLocaleDateString()
+    };
 
-  fetch(API, {
-    method: "POST",
-    mode: "no-cors", // GitHub Fix
-    body: JSON.stringify(payload)
-  }).then(() => {
-    Swal.fire("Kamyabi", "Registration request bhej di gayi hy. Sheet check karein aur Login tab par jayein.", "success").then(() => switchTab('login'));
-  }).catch(() => Swal.fire("Error", "Network Issue", "error"));
+    fetch(API, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
+    .then(() => {
+      Swal.fire("Success", "Registration complete!").then(() => switchTab('login'));
+    });
+  } catch(e) { Swal.fire("Error", "Try again later", "error"); }
 }
 </script>
 </body>
