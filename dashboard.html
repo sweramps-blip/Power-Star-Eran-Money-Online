@@ -16,7 +16,8 @@
         
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
         
-        .header { padding: 25px 20px; background: linear-gradient(135deg, #1a1f35 0%, #0a0e1a 100%); border-bottom: 1px solid var(--border); }
+        /* Header Fix */
+        .header { padding: 20px; background: #131829; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         
         .balance-card { 
             background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); 
@@ -25,86 +26,126 @@
             text-align: center;
         }
 
-        /* Latest News - Mota aur Behtar Look */
         .news-box { 
             margin: 0 20px 25px; 
-            background: rgba(251, 191, 36, 0.15); 
-            border: 2px solid var(--gold); 
-            padding: 12px; border-radius: 15px; 
+            background: rgba(251, 191, 36, 0.1); 
+            border: 1px solid rgba(251, 191, 36, 0.3); 
+            padding: 10px; border-radius: 12px; 
             display: flex; align-items: center;
-            box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.1);
         }
-        .news-box marquee { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+        .news-box marquee { font-size: 13px; font-weight: 600; color: #fff; }
 
-        /* Media Box - Large & Fixed */
         .media-container { 
             margin: 0 20px; 
             background: var(--card); 
             border-radius: 24px; 
-            padding: 10px; 
+            padding: 12px; 
             border: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center;
         }
-        .media-title { width: 100%; padding: 10px 15px; font-size: 15px; font-weight: 800; color: var(--gold); }
+        .media-title { padding: 5px 10px 12px; font-size: 14px; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 8px; }
 
         .media-content { 
             width: 100%; 
-            height: 250px; /* Bara size */
-            background: var(--card-dark); 
-            border-radius: 18px; 
-            overflow: hidden; /* Bahr nahi niklega */
+            height: 200px; 
+            background: #000; 
+            border-radius: 16px; 
+            overflow: hidden; 
             display: flex; align-items: center; justify-content: center;
-            position: relative;
             border: 1px solid var(--border);
         }
 
-        /* Is logic se video ya image hamesha box mein fit rahegi */
-        .media-content img, .media-content video {
-            width: 100%; height: 100%; object-fit: cover; 
-        }
+        .media-content img, .media-content video { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Nav Bar */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #161b2e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 1000; }
-        .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 11px; text-align: center; font-weight: 600; }
-        .nav-link i { font-size: 22px; display: block; margin-bottom: 5px; color: var(--text-secondary); }
-        .nav-link.active i { color: var(--gold); }
+        /* Nav Bar Fix */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #131829; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 1000; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 10px; text-align: center; transition: 0.3s; }
+        .nav-link i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-link.active { color: var(--gold); }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="font-weight:800; letter-spacing:-0.5px; margin:0;">POWER <span style="color:var(--gold)">STAR</span></h2>
-            <a href="#" style="text-decoration:none; color:var(--gold); font-size:20px;"><i class="fa-solid fa-headset"></i></a>
+            <h2 style="font-weight:800; font-size: 20px; margin:0;">POWER <span style="color:var(--gold)">STAR</span></h2>
+            <div style="display: flex; gap: 15px;">
+                <i class="fa-solid fa-headset" style="color: var(--gold); font-size: 18px;"></i>
+                <i class="fa-solid fa-right-from-bracket" onclick="logout()" style="color: #ef4444; font-size: 18px;"></i>
+            </div>
         </div>
     </div>
 
     <div class="balance-card">
-        <p style="font-size:14px; font-weight:600; opacity:0.9; margin-bottom:5px;">Available Balance</p>
-        <h1 style="font-size:38px; font-weight:900; margin:0; letter-spacing:1px;">Rs. <span id="u-bal">0.00</span></h1>
+        <p style="font-size:13px; font-weight:600; opacity:0.8; margin-bottom:5px;">Available Balance</p>
+        <h1 style="font-size:35px; font-weight:900; margin:0;">Rs. <span id="u-bal">0.00</span></h1>
     </div>
 
     <div class="news-box">
-        <span style="background:var(--gold); color:#000; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:900; margin-right:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">ALERTS</span>
-        <marquee scrollamount="5">⚠️ Welcome to Power Star! Deposit is now automatic. Refer friends and earn 10% commission daily.</marquee>
+        <span style="background:var(--gold); color:#000; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; margin-right:10px;">NEWS</span>
+        <marquee id="news-text">Loading latest announcements...</marquee>
     </div>
 
     <div class="media-container">
         <div class="media-title"><i class="fa-solid fa-bullhorn"></i> Official Announcement</div>
-        <div class="media-content">
-            <i class="fa-solid fa-circle-play" style="font-size:55px; color:var(--gold); opacity:0.6;"></i>
-            </div>
-        <p style="font-size:12px; color:var(--text-secondary); padding:15px; text-align:center; font-weight:500;">
-            Watch our latest video to understand how to earn more with Power Star.
+        <div class="media-content" id="media-content">
+            <i class="fa-solid fa-circle-play" style="font-size:40px; color:var(--gold); opacity:0.5;"></i>
+        </div>
+        <p style="font-size:11px; color:var(--text-secondary); padding:12px; text-align:center;">
+            Stay updated with our latest news and earning methods.
         </p>
     </div>
 
     <nav class="nav-bar">
-        <a href="#" class="nav-link active"><i class="fa-solid fa-house"></i>Home</a>
-        <a href="#" class="marketing.html"><i class="fa-solid fa-chart-simple"></i>Markeeting</a>
-        <a href="#" class="team.html"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
-        <a href="#" class="walet.html"><i class="fa-solid fa-wallet"></i>Walet</a>
+        <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-house"></i>Home</a>
+        <a href="marketing.html" class="nav-link"><i class="fa-solid fa-chart-simple"></i>Marketing</a>
+        <a href="team.html" class="nav-link"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
+        <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
     </nav>
+
+<script>
+const API_URL = "APKA_NEW_DEPLOY_LINK_YAHAN_DAALEIN"; // <-- Naya URL yahan dalein
+
+async function syncDashboard() {
+    const localUser = JSON.parse(localStorage.getItem("ps_user"));
+    if (!localUser) { window.location.href = "index.html"; return; }
+
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        // 1. Balance Update
+        const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
+        if(dbUser) {
+            document.getElementById("u-bal").innerText = dbUser.balance || "0.00";
+            localStorage.setItem("ps_user", JSON.stringify(dbUser));
+        }
+
+        // 2. News Update
+        if(data.settings && data.settings.news) {
+            document.getElementById("news-text").innerText = data.settings.news;
+        }
+
+        // 3. Media Update
+        const mediaBox = document.getElementById("media-content");
+        if(data.settings && data.settings.media_link) {
+            const type = data.settings.media_type.toLowerCase();
+            const link = data.settings.media_link;
+            if (type === "video") {
+                mediaBox.innerHTML = `<video src="${link}" controls autoplay muted loop></video>`;
+            } else {
+                mediaBox.innerHTML = `<img src="${link}">`;
+            }
+        }
+    } catch (e) { console.log("Sync Error"); }
+}
+
+function logout() {
+    localStorage.removeItem("ps_user");
+    window.location.href = "index.html";
+}
+
+window.onload = syncDashboard;
+</script>
 
 </body>
 </html>
