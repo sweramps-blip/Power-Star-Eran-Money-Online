@@ -1,1 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Power Star | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { 
+            --gold: #fbbf24; --gold-dark: #d97706; --bg: #0a0e1a; 
+            --card: #1a1f35; --border: #2d3548; --card-dark: #151929;
+            --text-secondary: #94a3b8;
+        }
+        
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+        
+        .header { padding: 25px 20px; background: linear-gradient(135deg, #1a1f35 0%, #0a0e1a 100%); border-bottom: 1px solid var(--border); }
+        
+        .balance-card { 
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); 
+            padding: 30px 25px; border-radius: 24px; margin: 20px; 
+            box-shadow: 0 15px 35px rgba(217, 119, 6, 0.2);
+            text-align: center;
+        }
 
+        /* Latest News - Mota aur Behtar Look */
+        .news-box { 
+            margin: 0 20px 25px; 
+            background: rgba(251, 191, 36, 0.15); 
+            border: 2px solid var(--gold); 
+            padding: 12px; border-radius: 15px; 
+            display: flex; align-items: center;
+            box-shadow: inset 0 0 10px rgba(251, 191, 36, 0.1);
+        }
+        .news-box marquee { font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Media Box - Large & Fixed */
+        .media-container { 
+            margin: 0 20px; 
+            background: var(--card); 
+            border-radius: 24px; 
+            padding: 10px; 
+            border: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .media-title { width: 100%; padding: 10px 15px; font-size: 15px; font-weight: 800; color: var(--gold); }
+
+        .media-content { 
+            width: 100%; 
+            height: 250px; /* Bara size */
+            background: var(--card-dark); 
+            border-radius: 18px; 
+            overflow: hidden; /* Bahr nahi niklega */
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        /* Is logic se video ya image hamesha box mein fit rahegi */
+        .media-content img, .media-content video {
+            width: 100%; height: 100%; object-fit: cover; 
+        }
+
+        /* Nav Bar */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #161b2e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); z-index: 1000; }
+        .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 11px; text-align: center; font-weight: 600; }
+        .nav-link i { font-size: 22px; display: block; margin-bottom: 5px; color: var(--text-secondary); }
+        .nav-link.active i { color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-weight:800; letter-spacing:-0.5px; margin:0;">POWER <span style="color:var(--gold)">STAR</span></h2>
+            <a href="#" style="text-decoration:none; color:var(--gold); font-size:20px;"><i class="fa-solid fa-headset"></i></a>
+        </div>
+    </div>
+
+    <div class="balance-card">
+        <p style="font-size:14px; font-weight:600; opacity:0.9; margin-bottom:5px;">Available Balance</p>
+        <h1 style="font-size:38px; font-weight:900; margin:0; letter-spacing:1px;">Rs. <span id="u-bal">0.00</span></h1>
+    </div>
+
+    <div class="news-box">
+        <span style="background:var(--gold); color:#000; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:900; margin-right:12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">ALERTS</span>
+        <marquee scrollamount="5">⚠️ Welcome to Power Star! Deposit is now automatic. Refer friends and earn 10% commission daily.</marquee>
+    </div>
+
+    <div class="media-container">
+        <div class="media-title"><i class="fa-solid fa-bullhorn"></i> Official Announcement</div>
+        <div class="media-content">
+            <i class="fa-solid fa-circle-play" style="font-size:55px; color:var(--gold); opacity:0.6;"></i>
+            </div>
+        <p style="font-size:12px; color:var(--text-secondary); padding:15px; text-align:center; font-weight:500;">
+            Watch our latest video to understand how to earn more with Power Star.
+        </p>
+    </div>
+
+    <nav class="nav-bar">
+        <a href="#" class="nav-link active"><i class="fa-solid fa-house"></i>Home</a>
+        <a href="#" class="marketing.html"><i class="fa-solid fa-chart-simple"></i>Markeeting</a>
+        <a href="#" class="team.html"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
+        <a href="#" class="walet.html"><i class="fa-solid fa-wallet"></i>Walet</a>
+    </nav>
+
+</body>
+</html>
