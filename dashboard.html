@@ -26,6 +26,7 @@
             padding: 30px 25px; border-radius: 24px; margin: 20px; 
             box-shadow: 0 15px 35px rgba(217, 119, 6, 0.2);
             text-align: center;
+            position: relative; /* Added for Icon positioning */
         }
 
         .news-box { 
@@ -74,6 +75,9 @@
     </div>
 
     <div class="balance-card">
+        <a href="#" style="position: absolute; right: 20px; top: 20px; color: #fff; background: rgba(0,0,0,0.1); padding: 8px; border-radius: 50%; text-decoration: none;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </a>
         <p style="font-size:13px; font-weight:600; opacity:0.8; margin-bottom:5px;">Available Balance</p>
         <h1 style="font-size:35px; font-weight:900; margin:0;">Rs. <span id="u-bal">0.00</span></h1>
     </div>
@@ -95,11 +99,17 @@
         <a href="team.html" class="nav-link"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
         <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
     </nav>
+
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwo-zF_6Vs4nWpfgienzvQ_M1fdRa5ybR4Jt4vBtrlxDEBac6JELKmX-PX-ISIABFEa/exec";
+// Use the URL from your latest successful deployment
+const API_URL = "https://script.google.com/macros/s/AKfycbxPoOiyPVu8onUI7G98Ok8hkHHkYUgEMklZJHaB9DlCHnEI7J--dknXibZiOGc3MvLV/exec";
+
 async function syncDashboard() {
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
     if (!localUser) { window.location.href = "index.html"; return; }
+    
+    // Display local name immediately
+    document.getElementById("u-name").innerText = localUser.name || "User";
 
     try {
         const res = await fetch(API_URL);
@@ -111,32 +121,34 @@ async function syncDashboard() {
             if(dbUser) {
                 document.getElementById("u-bal").innerText = dbUser.balance;
                 document.getElementById("u-id").innerText = dbUser.user_id;
+                document.getElementById("u-name").innerText = dbUser.name;
                 localStorage.setItem("ps_user", JSON.stringify(dbUser));
             }
         }
 
-        // 2. NEWS UPDATE (Settings A2)
+        // 2. NEWS UPDATE
         if (data.settings && data.settings.news) {
             const newsMarquee = document.getElementById("news-text");
-            if(newsMarquee) newsMarquee.innerText = data.settings.news;
+            if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
 
-        // 3. MEDIA UPDATE (Settings B2 & C2)
+        // 3. MEDIA UPDATE
         const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-                mediaBox.innerHTML = `<video src="${link}" autoplay muted loop playsinline style="width:100%; border-radius:12px;"></video>`;
+                mediaBox.innerHTML = `<video src="${link}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`;
             } else {
-                mediaBox.innerHTML = `<img src="${link}" style="width:100%; border-radius:12px; display:block;">`;
+                mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
         }
     } catch (e) {
         console.log("Sync Error: ", e);
     }
 }
+
 function logout() {
     localStorage.removeItem("ps_user");
     window.location.href = "index.html";
