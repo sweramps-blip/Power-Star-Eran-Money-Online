@@ -108,11 +108,11 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
 </div>
 
 <script>
-// --- CONFIG ---
-const API = "https://script.google.com/macros/s/AKfycbwYYosHN-ZcaZ4-eGnbL6FR3LpRpLfEjKx7BVNSMNcV7ecDyuy6zt5Nt2lv6NEJFy7O/exec";
+// --- CONFIG (Apna Link Update Rakhein) ---
+const API = "https://script.google.com/macros/s/AKfycbyQHYAqMZFoBCso7-ZH6f71WMormLiydqOhFkIjofUicsluTqgiiLvOiLrgm3RS-TzM/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
-// --- ORIGINAL LOGIC: DEVICE ID ---
+// --- PURANA LOGIC: DEVICE ID ---
 const current_device_id = btoa(navigator.userAgent + screen.width).substring(0, 15);
 document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
 
@@ -135,7 +135,7 @@ function toggleDID() {
   el.innerText = el.innerText.includes("*") ? current_device_id : current_device_id.slice(0, 6) + "****";
 }
 
-// --- ORIGINAL LOGIC: STRENGTH CHECK ---
+// --- PURANA LOGIC: PASSWORD STRENGTH ---
 function checkStrength() {
   const p = document.getElementById("r-pass").value;
   const segs = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
@@ -147,11 +147,11 @@ function checkStrength() {
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
 
-// --- CORE LOGIC: LOGIN ---
+// --- LOGIN LOGIC ---
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
-  if(!num || !pass) return Swal.fire("Error", "Fields fill karein", "warning");
+  if(!num || !pass) return Swal.fire("Tawajjo", "Fields fill karein", "warning");
 
   Swal.fire({title: 'Authenticating...', didOpen: () => Swal.showLoading()});
   try {
@@ -159,22 +159,22 @@ async function doLogin() {
     const users = await res.json();
     const user = users.find(u => String(u.number) === num && String(u.password) === pass);
 
-    if(!user) return Swal.fire("Error", "Invalid details", "error");
-    if(user.device_id !== current_device_id) return Swal.fire("Security", "Different mobile detected!", "error");
+    if(!user) return Swal.fire("Ghalti", "Number ya Password darust nahi hy.", "error");
+    if(user.device_id !== current_device_id) return Swal.fire("Security", "Ye account kisi aur mobile par registered hy!", "error");
 
     localStorage.setItem("ps_user", JSON.stringify(user));
-    Swal.fire("Kamyab", "Login Successful", "success").then(() => window.location.href = "dashboard.html");
-  } catch(e) { Swal.fire("Error", "API/Network Error", "error"); }
+    Swal.fire("Kamyab", "Login ho gaya!", "success").then(() => window.location.href = "dashboard.html");
+  } catch(e) { Swal.fire("Error", "Server se raabta nahi ho raha.", "error"); }
 }
 
-// --- CORE LOGIC: REGISTER ---
+// --- REGISTER LOGIC ---
 async function doRegister() {
   const payload = {
     key: KEY, action: "register",
-    name: document.getElementById("r-name").value,
-    number: document.getElementById("r-num").value,
-    password: document.getElementById("r-pass").value,
-    referral: document.getElementById("r-ref").value,
+    name: document.getElementById("r-name").value.trim(),
+    number: document.getElementById("r-num").value.trim(),
+    password: document.getElementById("r-pass").value.trim(),
+    referral: document.getElementById("r-ref").value.trim(),
     device_id: current_device_id,
     date: new Date().toLocaleDateString()
   };
@@ -183,13 +183,12 @@ async function doRegister() {
 
   Swal.fire({title: 'Processing...', didOpen: () => Swal.showLoading()});
 
-  // FINAL GITHUB FIX: no-cors mode use karein data bhejny k liye
   fetch(API, {
     method: "POST",
-    mode: "no-cors",
+    mode: "no-cors", // GitHub Fix
     body: JSON.stringify(payload)
   }).then(() => {
-    Swal.fire("Kamyabi", "Account Request Bhej di gayi hy. Check Sheet and Login.", "success").then(() => switchTab('login'));
+    Swal.fire("Kamyabi", "Registration request bhej di gayi hy. Sheet check karein aur Login tab par jayein.", "success").then(() => switchTab('login'));
   }).catch(() => Swal.fire("Error", "Network Issue", "error"));
 }
 </script>
