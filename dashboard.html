@@ -97,52 +97,46 @@
     </nav>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwo-zF_6Vs4nWpfgienzvQ_M1fdRa5ybR4Jt4vBtrlxDEBac6JELKmX-PX-ISIABFEa/exec";
-
 async function syncDashboard() {
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
     if (!localUser) { window.location.href = "index.html"; return; }
 
-    // Pehle local data dikhao taake screen khali na lage
-    document.getElementById("u-name").innerText = localUser.name;
-    document.getElementById("u-id").innerText = localUser.user_id || "PS-User";
-    document.getElementById("u-bal").innerText = localUser.balance || "0.00";
-
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
-
-        // 1. User Balance aur ID Sync karein
+        
+        // 1. User Data Sync
         if (data.users) {
             const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
             if(dbUser) {
-                document.getElementById("u-bal").innerText = dbUser.balance || "0.00";
+                document.getElementById("u-bal").innerText = dbUser.balance;
                 document.getElementById("u-id").innerText = dbUser.user_id;
                 localStorage.setItem("ps_user", JSON.stringify(dbUser));
             }
         }
 
-        // 2. News Update (Settings Sheet se)
-        if(data.settings && data.settings.news) {
-            document.getElementById("news-text").innerText = data.settings.news;
+        // 2. NEWS UPDATE (Settings A2)
+        if (data.settings && data.settings.news) {
+            const newsMarquee = document.getElementById("news-text");
+            if(newsMarquee) newsMarquee.innerText = data.settings.news;
         }
 
-        // 3. Media Update (Settings Sheet se)
-        if(data.settings && data.settings.media_link) {
-            const mediaBox = document.getElementById("media-content");
-            const type = String(data.settings.media_type).toLowerCase();
+        // 3. MEDIA UPDATE (Settings B2 & C2)
+        const mediaBox = document.getElementById("media-content");
+        if (mediaBox && data.settings && data.settings.media_link) {
+            const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-                mediaBox.innerHTML = `<video src="${link}" style="width:100%; height:100%; object-fit:cover;" autoplay muted loop playsinline></video>`;
+                mediaBox.innerHTML = `<video src="${link}" autoplay muted loop playsinline style="width:100%; border-radius:12px;"></video>`;
             } else {
-                mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
+                mediaBox.innerHTML = `<img src="${link}" style="width:100%; border-radius:12px; display:block;">`;
             }
         }
-    } catch (e) { 
-        console.log("Sync Error:", e);
+    } catch (e) {
+        console.log("Sync Error: ", e);
     }
 }
-
 function logout() {
     localStorage.removeItem("ps_user");
     window.location.href = "index.html";
