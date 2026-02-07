@@ -129,25 +129,45 @@ function checkStrength() {
   else if (p.length < 10) { segs[0].classList.add("on-medium"); segs[1].classList.add("on-medium"); label.innerText = "Medium"; label.style.color = "#f97316"; }
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
-
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
-  if(!num || !pass) return Swal.fire("Wait", "Fill all fields", "warning");
+  
+  if(!num || !pass) return Swal.fire("Rukiye", "Phone number aur password lazmi hy!", "warning");
 
-  Swal.fire({title: 'Authenticating...', didOpen: () => Swal.showLoading()});
+  Swal.fire({title: 'Checking Details...', didOpen: () => Swal.showLoading()});
+  
   try {
     const res = await fetch(API);
-    const users = await res.json();
-    const user = users.find(u => String(u.number) === num && String(u.password) === pass);
+    const data = await res.json();
+    
+    // Check ke users list mil rahi hy ya nahi
+    if(!data.users || data.users.length === 0) {
+        return Swal.fire("Error", "Server se users ka data nahi mila!", "error");
+    }
 
-    if(!user) return Swal.fire("Error", "Invalid login", "error");
-    if(user.device_id !== current_device_id) return Swal.fire("Security", "Different device detected!", "error");
+    // User ko dhoondo
+    const user = data.users.find(u => String(u.number) === num && String(u.password) === pass);
 
+    if(!user) {
+        return Swal.fire("Ghalti", "Invalid number ya password!", "error");
+    }
+    
+    // Security: Device ID check
+    if(user.device_id !== current_device_id) {
+        return Swal.fire("Security Alert", "Ye account kisi aur mobile ka hy!", "error");
+    }
+
+    // Data save karo aur dashboard par bhejo
     localStorage.setItem("ps_user", JSON.stringify(user));
     window.location.href = "dashboard.html";
-  } catch(e) { Swal.fire("Error", "Server issues", "error"); }
+    
+  } catch(e) { 
+    console.error(e);
+    Swal.fire("Error", "Server issues! Apps Script deployment check karein.", "error"); 
+  }
 }
+
 async function doRegister() {
   const name = document.getElementById("r-name").value.trim();
   const num = document.getElementById("r-num").value.trim();
