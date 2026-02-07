@@ -551,7 +551,8 @@ body::before {
      ============================================================ -->
 <script>
 // ─── CONFIG ──────────────────────────────────────────────────
-const API = "1mXVV9HVbN13M9MfyOhxUNRGogJkJjrRF6N55baluvR4";
+// Aapka naya Live API Link yahan set kar diya hy
+const API = "https://script.google.com/macros/s/AKfycbwYYosHN-ZcaZ4-eGnbL6FR3LpRpLfEjKx7BVNSMNcV7ecDyuy6zt5Nt2lv6NEJFy7O/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
 // ─── DEVICE ID GENERATOR ──────────────────────────────────────
@@ -603,7 +604,7 @@ function checkStrength() {
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
 
-// ─── LOGIN LOGIC (Fixed) ───────────────────
+// ─── LOGIN LOGIC ───────────────────
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
@@ -613,45 +614,37 @@ async function doLogin() {
   Swal.fire({ title: 'Signing in...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
   try {
-    const response = await fetch(`${API}?action=getUsers`); 
+    const response = await fetch(API); 
     const users = await response.json();
     
-    // Aapke Sheet Columns ke mutabiq matching
     const user = users.find(u => String(u.number) === num && String(u.password) === pass);
 
     if (!user) {
         return Swal.fire("Ghalti", "Number ya Password darust nahi hy.", "error");
     }
 
-    // Security Check 1: Status (Column H)
     if (user.status === "Blocked") {
         return Swal.fire("Account Blocked", "Aapka account block kar diya gaya hy.", "error");
     }
 
-    // Security Check 2: One Device One Account (Column F)
     if (user.device_id !== current_device_id) {
         return Swal.fire("Security Alert", "Ye account kisi aur mobile par registered hy!", "warning");
     }
 
-    // Data Save karein
     localStorage.setItem("ps_user", JSON.stringify(user));
     
     Swal.fire({
-      icon: 'success',
-      title: 'Khush Amdeed!',
-      text: 'Login kamyab raha.',
-      timer: 1500,
-      showConfirmButton: false
+      icon: 'success', title: 'Khush Amdeed!', text: 'Login kamyab raha.', timer: 1500, showConfirmButton: false
     }).then(() => {
         window.location.href = "dashboard.html"; 
     });
 
   } catch (e) {
-    Swal.fire("Error", "Server busy hy ya internet ka masla hy.", "error");
+    Swal.fire("Error", "Server se raabta nahi ho raha.", "error");
   }
 }
 
-// ─── REGISTER LOGIC (Fixed) ─────────────────────
+// ─── REGISTER LOGIC ─────────────────────
 async function doRegister() {
   const name = document.getElementById("r-name").value.trim();
   const num = document.getElementById("r-num").value.trim();
@@ -660,7 +653,6 @@ async function doRegister() {
   const termsChecked = document.getElementById("terms-chk").checked;
 
   if (!name || !num || !pass) return Swal.fire("Error", "Saray fields bharna lazmi hain.", "warning");
-  if (num.length < 10) return Swal.fire("Ghalti", "Mobile number sahi likhein.", "info");
   if (!termsChecked) return Swal.fire("Wait!", "Terms & Conditions accept karein.", "info");
 
   Swal.fire({ title: 'Account Ban raha hy...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
@@ -672,15 +664,15 @@ async function doRegister() {
     number: num,
     password: pass,
     referral: ref,
-    device_id: current_device_id, // column F
-    date: new Date().toISOString().split('T')[0] // column G
+    device_id: current_device_id,
+    date: new Date().toLocaleDateString()
   };
 
   try {
-    // Note: Apps Script side par hum check karenge ke Number aur Device ID pehle se mojood na hon
-    const response = await fetch(API, { 
-        method: "POST", 
-        body: JSON.stringify(payload) 
+    // Google Apps Script POST request
+    const response = await fetch(API, {
+        method: "POST",
+        body: JSON.stringify(payload)
     });
     
     const result = await response.json();
@@ -693,9 +685,8 @@ async function doRegister() {
       Swal.fire("Ghalti", result.message, "error");
     }
   } catch (e) {
-    // Agar CORS issue ho to hum assume karte hain data chala gaya, 
-    // lekin behtar hy Apps Script mein JSON output set rakhein.
-    Swal.fire("Tawajjo", "Registration request bhej di gayi hy. Login karkay check karein.", "info");
+    // Agar registration ho jaye lekin JSON response mein masla ho
+    Swal.fire("Tawajjo", "Request bhej di gayi hy. Login karkay check karein.", "info");
   }
 }
 </script>
