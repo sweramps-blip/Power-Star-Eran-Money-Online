@@ -95,44 +95,52 @@
         <a href="team.html" class="nav-link"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
         <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
     </nav>
-
 <script>
-// Use your deployment URL
 const API_URL = "https://script.google.com/macros/s/AKfycbyvpJKSmRDcUGrvbgHh6pkMp6CakVp2vispWdkTZBiAXSn3B1KYlve74D_DOqzGrvH1/exec";
 
 async function syncDashboard() {
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
     if (!localUser) { window.location.href = "index.html"; return; }
 
-    // First, show local data for speed
+    // Pehle local data dikhao taake screen khali na lage
     document.getElementById("u-name").innerText = localUser.name;
     document.getElementById("u-id").innerText = localUser.user_id || "PS-User";
+    document.getElementById("u-bal").innerText = localUser.balance || "0.00";
 
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        // 1. Find User to update balance/info
-        const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
-        if(dbUser) {
-            document.getElementById("u-bal").innerText = dbUser.balance || "0.00";
-            document.getElementById("u-id").innerText = dbUser.user_id; // From Column I
-            localStorage.setItem("ps_user", JSON.stringify(dbUser));
+        // 1. User Balance aur ID Sync karein
+        if (data.users) {
+            const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
+            if(dbUser) {
+                document.getElementById("u-bal").innerText = dbUser.balance || "0.00";
+                document.getElementById("u-id").innerText = dbUser.user_id;
+                localStorage.setItem("ps_user", JSON.stringify(dbUser));
+            }
         }
 
-        // 2. News Update
-        if(data.settings.news) document.getElementById("news-text").innerText = data.settings.news;
-
-        // 3. Media Update
-        const mediaBox = document.getElementById("media-content");
-        const type = data.settings.media_type.toLowerCase();
-        const link = data.settings.media_link;
-        if (type === "video") {
-            mediaBox.innerHTML = `<video src="${link}" controls autoplay muted loop></video>`;
-        } else {
-            mediaBox.innerHTML = `<img src="${link}">`;
+        // 2. News Update (Settings Sheet se)
+        if(data.settings && data.settings.news) {
+            document.getElementById("news-text").innerText = data.settings.news;
         }
-    } catch (e) { console.log("Dashboard sync failed"); }
+
+        // 3. Media Update (Settings Sheet se)
+        if(data.settings && data.settings.media_link) {
+            const mediaBox = document.getElementById("media-content");
+            const type = String(data.settings.media_type).toLowerCase();
+            const link = data.settings.media_link;
+
+            if (type === "video") {
+                mediaBox.innerHTML = `<video src="${link}" style="width:100%; height:100%; object-fit:cover;" autoplay muted loop playsinline></video>`;
+            } else {
+                mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+        }
+    } catch (e) { 
+        console.log("Sync Error:", e);
+    }
 }
 
 function logout() {
@@ -142,5 +150,6 @@ function logout() {
 
 window.onload = syncDashboard;
 </script>
+
 </body>
 </html>
