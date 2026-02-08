@@ -10,9 +10,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-/* ============================================================
-   APKA ORIGINAL STYLE (NO SHORTCUTS)
-   ============================================================ */
+/* آپ کا ORIGINAL DESIGN - بالکل same */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Outfit', sans-serif; background: #0a0e1a; color: #fff; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
@@ -38,21 +36,16 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
 .eye-toggle { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: #3d4f6e; font-size: 14px; cursor: pointer; background: none; border: none; z-index: 2; }
 .phone-prefix { position: absolute; left: 38px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 600; color: #fbbf24; pointer-events: none; }
 .input-wrap.phone input { padding-left: 78px; }
-
-/* Password Strength Restored */
 .strength-track { display: flex; gap: 5px; margin-top: 8px; height: 3px; }
 .strength-seg { flex: 1; border-radius: 3px; background: #1e2a45; transition: 0.3s; }
 .strength-seg.on-weak { background: #ef4444; }
 .strength-seg.on-medium { background: #f97316; }
 .strength-seg.on-strong { background: #22c55e; }
 .strength-label { font-size: 11px; margin-top: 5px; font-weight: 600; min-height: 16px; }
-
-/* Terms & Conditions Restored */
 .terms-row { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; cursor: pointer; }
 .terms-row input { accent-color: #fbbf24; width: 16px; height: 16px; margin-top: 2px; }
 .terms-row span { font-size: 12px; color: #64748b; line-height: 1.4; }
 .terms-row b { color: #fbbf24; text-decoration: underline; }
-
 .submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border: none; border-radius: 13px; color: #0a0e1a; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.25s; box-shadow: 0 4px 16px rgba(251,191,36,0.3); }
 .submit-btn:active { transform: scale(0.96); }
 .device-row { margin-top: 22px; text-align: center; font-size: 11px; color: #3d4f6e; display: flex; align-items: center; justify-content: center; gap: 6px; }
@@ -100,10 +93,10 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbwJxCYSl07DxXnY8aSib_Jprxx3fr5Mmxkw4llpBVIWVMsB1dddpzAq87OVVdrCRpRB/exec";
+const API = "https://script.google.com/macros/s/AKfycbxW--R0HxV_5qUYNh4hMq4U8PXgWxQCg1Ghsw1j6IGN02neoJR2PA6n9g8B5y0Uv9H2/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
-// Device Protection Logic
+// Device ID generation
 const current_device_id = btoa(navigator.userAgent + screen.width).substring(0, 15);
 document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
 
@@ -129,6 +122,7 @@ function checkStrength() {
   else if (p.length < 10) { segs[0].classList.add("on-medium"); segs[1].classList.add("on-medium"); label.innerText = "Medium"; label.style.color = "#f97316"; }
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
+
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
@@ -141,12 +135,10 @@ async function doLogin() {
     const res = await fetch(API);
     const data = await res.json();
     
-    // Check ke users list mil rahi hy ya nahi
     if(!data.users || data.users.length === 0) {
         return Swal.fire("Error", "Server se users ka data nahi mila!", "error");
     }
 
-    // User ko dhoondo
     const user = data.users.find(u => String(u.number) === num && String(u.password) === pass);
 
     if(!user) {
@@ -155,10 +147,14 @@ async function doLogin() {
     
     // Security: Device ID check
     if(user.device_id !== current_device_id) {
-        return Swal.fire("Security Alert", "Ye account kisi aur mobile ka hy!", "error");
+        return Swal.fire({
+            title: "⚠️ Security Alert",
+            html: "Ye account kisi aur device ka hai!<br><br><small>Agar ye aap ka account hai to us device se login karein.</small>",
+            icon: "error",
+            confirmButtonColor: "#ff4d4d"
+        });
     }
 
-    // Data save karo aur dashboard par bhejo
     localStorage.setItem("ps_user", JSON.stringify(user));
     window.location.href = "dashboard.html";
     
@@ -185,18 +181,31 @@ async function doRegister() {
     const data = await res.json();
     const users = data.users;
 
-    if(users.some(u => u.device_id === current_device_id)) {
-        return Swal.fire("Security Alert", "Is mobile par account pehle hi bana hua hy!", "error");
+    // ✅ CORRECT LOGIC: Check if THIS SPECIFIC number already exists
+    const existingNumber = users.find(u => String(u.number) === num);
+    if(existingNumber) {
+        return Swal.fire({
+            title: "❌ Number Already Registered",
+            html: `Phone number <b>${num}</b> pehle se registered hai.<br><br>Agar aap ka account hai to <b>Login</b> karein.`,
+            icon: "warning",
+            confirmButtonColor: "#fbbf24"
+        });
     }
 
-    if(users.some(u => String(u.number) === num)) {
-        return Swal.fire("Ghalti", "Ye number pehle se system mein hy!", "warning");
+    // ✅ CORRECT LOGIC: Check if THIS SPECIFIC device already has account
+    const existingDevice = users.find(u => u.device_id === current_device_id);
+    if(existingDevice) {
+        return Swal.fire({
+            title: "⚠️ Device Already Used",
+            html: `Is device par pehle se account bana hua hai:<br><br><b>${existingDevice.name}</b> (${existingDevice.number})<br><br>Ek device par sirf <b>ek account</b> allowed hai.`,
+            icon: "error",
+            confirmButtonColor: "#ff4d4d"
+        });
     }
 
-    // --- ID GENERATOR LOGIC ---
+    // ✅ Both checks passed - Create account
     const newIdCount = users.length + 1;
     const auto_id = "PS" + String(newIdCount).padStart(4, '0');
-    // --------------------------
 
     const payload = {
       key: KEY,
@@ -207,7 +216,7 @@ async function doRegister() {
       referral: ref,
       device_id: current_device_id,
       date: new Date().toLocaleDateString(),
-      user_id: auto_id // Ye Column I ke liye hy
+      user_id: auto_id
     };
 
     fetch(API, {
@@ -216,15 +225,20 @@ async function doRegister() {
       body: JSON.stringify(payload)
     }).then(() => {
       Swal.fire({
-        title: "Kamyabi!",
-        html: `Account ban gaya hy!<br>ID: <b style="color:#fbbf24;">${auto_id}</b>`,
-        icon: "success"
+        title: "✅ Kamyabi!",
+        html: `Account ban gaya hai!<br><br>Your ID: <b style="color:#fbbf24;">${auto_id}</b><br><br>Ab <b>Login</b> karein.`,
+        icon: "success",
+        confirmButtonColor: "#10b981"
       }).then(() => {
+          // Auto-fill login form
+          document.getElementById("l-num").value = num;
+          document.getElementById("l-pass").value = pass;
           switchTab('login');
       });
     });
 
   } catch(e) {
+    console.error(e);
     Swal.fire("Error", "Server issues", "error");
   }
 }
