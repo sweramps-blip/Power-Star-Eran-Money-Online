@@ -17,7 +17,6 @@
         
         .header { padding: 20px; background: #131829; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         
-        /* User ID Badge Style */
         .user-meta { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #0f1423; font-size: 12px; border-bottom: 1px solid var(--border); }
         .id-badge { background: rgba(251, 191, 36, 0.1); color: var(--gold); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3); font-weight: 700; }
 
@@ -26,8 +25,108 @@
             padding: 30px 25px; border-radius: 24px; margin: 20px; 
             box-shadow: 0 15px 35px rgba(217, 119, 6, 0.2);
             text-align: center;
-            position: relative; /* Added for Icon positioning */
+            position: relative;
         }
+        
+        /* History Icon - Top Right */
+        .history-icon { 
+            position: absolute; right: 20px; top: 20px; color: #fff; 
+            background: rgba(0,0,0,0.15); padding: 10px; border-radius: 50%; 
+            cursor: pointer; font-size: 16px; transition: 0.2s;
+        }
+        .history-icon:active { transform: scale(0.9); }
+
+        /* Income Button */
+        .income-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #0a0e1a;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .income-btn:active { transform: scale(0.95); }
+
+        /* History Box / Modal */
+        .history-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .history-modal.show { display: flex; }
+        
+        .history-content {
+            background: var(--card);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .history-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--card);
+            z-index: 1;
+        }
+        
+        .history-header h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        
+        .close-modal {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .history-body {
+            padding: 15px 20px;
+        }
+        
+        .history-item {
+            background: var(--card-dark);
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-item-left { flex: 1; }
+        .history-type { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .history-date { font-size: 11px; color: #64748b; font-weight: 600; }
+        .history-amount { font-size: 16px; font-weight: 900; color: var(--gold); }
 
         .news-box { 
             margin: 0 20px 25px; 
@@ -75,11 +174,18 @@
     </div>
 
     <div class="balance-card">
-        <a href="#" style="position: absolute; right: 20px; top: 20px; color: #fff; background: rgba(0,0,0,0.1); padding: 8px; border-radius: 50%; text-decoration: none;">
+        <!-- History Icon -->
+        <div class="history-icon" onclick="openHistory()">
             <i class="fa-solid fa-clock-rotate-left"></i>
-        </a>
+        </div>
+        
         <p style="font-size:13px; font-weight:600; opacity:0.8; margin-bottom:5px;">Available Balance</p>
         <h1 style="font-size:35px; font-weight:900; margin:0;">Rs. <span id="u-bal">0.00</span></h1>
+        
+        <!-- Income Button -->
+        <div class="income-btn" onclick="showIncome()">
+            <i class="fa-solid fa-sack-dollar"></i> View Income
+        </div>
     </div>
 
     <div class="news-box">
@@ -100,22 +206,32 @@
         <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
     </nav>
 
+    <!-- History Modal -->
+    <div class="history-modal" id="history-modal">
+        <div class="history-content">
+            <div class="history-header">
+                <h3><i class="fa-solid fa-history"></i> Transaction History</h3>
+                <button class="close-modal" onclick="closeHistory()">CLOSE</button>
+            </div>
+            <div class="history-body" id="history-body">
+                <p style="text-align: center; color: #64748b; padding: 30px;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
 <script>
-// Use the URL from your latest successful deployment
-const API_URL = "https://script.google.com/macros/s/AKfycbwJxCYSl07DxXnY8aSib_Jprxx3fr5Mmxkw4llpBVIWVMsB1dddpzAq87OVVdrCRpRB/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxW--R0HxV_5qUYNh4hMq4U8PXgWxQCg1Ghsw1j6IGN02neoJR2PA6n9g8B5y0Uv9H2/exec";
 
 async function syncDashboard() {
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
     if (!localUser) { window.location.href = "index.html"; return; }
     
-    // Display local name immediately
     document.getElementById("u-name").innerText = localUser.name || "User";
 
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
         
-        // 1. User Data Sync
         if (data.users) {
             const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
             if(dbUser) {
@@ -126,13 +242,11 @@ async function syncDashboard() {
             }
         }
 
-        // 2. NEWS UPDATE
         if (data.settings && data.settings.news) {
             const newsMarquee = document.getElementById("news-text");
             if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
 
-        // 3. MEDIA UPDATE
         const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
@@ -149,12 +263,79 @@ async function syncDashboard() {
     }
 }
 
+// Open History Modal
+async function openHistory() {
+    document.getElementById("history-modal").classList.add("show");
+    
+    const localUser = JSON.parse(localStorage.getItem("ps_user"));
+    const historyBody = document.getElementById("history-body");
+    
+    historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
+    
+    try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        
+        if (!data.withdrawals || data.withdrawals.length === 0) {
+            historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;">No transactions yet</p>';
+            return;
+        }
+        
+        const userHistory = data.withdrawals.filter(w => String(w.user_id) === String(localUser.user_id));
+        
+        if (userHistory.length === 0) {
+            historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;">No transactions yet</p>';
+            return;
+        }
+        
+        let html = '';
+        userHistory.reverse().forEach(item => {
+            const date = new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            html += `
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <div class="history-type">Withdrawal</div>
+                        <div class="history-date">${date} • ${item.status}</div>
+                    </div>
+                    <div class="history-amount">Rs. ${item.amount}</div>
+                </div>
+            `;
+        });
+        
+        historyBody.innerHTML = html;
+        
+    } catch (e) {
+        historyBody.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 30px;">Error loading history</p>';
+    }
+}
+
+function closeHistory() {
+    document.getElementById("history-modal").classList.remove("show");
+}
+
+// Show Income
+function showIncome() {
+    const user = JSON.parse(localStorage.getItem("ps_user"));
+    
+    Swal.fire({
+        title: '<strong>💰 Your Income</strong>',
+        html: `
+            <div style="text-align: left; padding: 10px;">
+                <p style="margin: 10px 0;"><b>Total Balance:</b> Rs. ${user.balance || 0}</p>
+                <p style="margin: 10px 0;"><b>User ID:</b> ${user.user_id}</p>
+                <p style="margin: 10px 0; color: #64748b; font-size: 12px;">Visit Team page to see referral earnings</p>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonColor: '#fbbf24'
+    });
+}
+
 function logout() {
     localStorage.removeItem("ps_user");
     window.location.href = "index.html";
 }
 
-// Force sync even if window.onload misses it
 document.addEventListener('DOMContentLoaded', () => {
     syncDashboard();
 });
