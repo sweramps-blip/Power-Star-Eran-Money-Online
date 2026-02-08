@@ -91,15 +91,25 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
     <div class="device-row">ID: <span class="did-value" id="did-text">######</span></div>
   </div>
 </div>
-
 <script>
 const API = "https://script.google.com/macros/s/AKfycbxW--R0HxV_5qUYNh4hMq4U8PXgWxQCg1Ghsw1j6IGN02neoJR2PA6n9g8B5y0Uv9H2/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
-// Device ID generation
-const current_device_id = btoa(navigator.userAgent + screen.width).substring(0, 15);
-document.getElementById("did-text").innerText = current_device_id.slice(0, 6) + "****";
+// ✅ 1. IMPROVED UNIQUE DEVICE ID LOGIC (Anti-Conflict)
+function getUniqueDeviceId() {
+    let id = localStorage.getItem('ps_unique_device_id');
+    if (!id) {
+        // Generates a truly unique ID for every different phone
+        id = 'PS-' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+        localStorage.setItem('ps_unique_device_id', id);
+    }
+    return id;
+}
 
+const current_device_id = getUniqueDeviceId();
+document.getElementById("did-text").innerText = current_device_id.slice(0, 8).toUpperCase() + "****";
+
+// ✅ 2. UI FUNCTIONS (Tabs & Eyes)
 function switchTab(t){
   document.getElementById("tab-login").classList.toggle("active",t==='login');
   document.getElementById("tab-register").classList.toggle("active",t==='register');
@@ -123,6 +133,7 @@ function checkStrength() {
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
 
+// ✅ 3. LOGIN LOGIC (With Device Lock)
 async function doLogin() {
   const num = document.getElementById("l-num").value.trim();
   const pass = document.getElementById("l-pass").value.trim();
@@ -135,23 +146,18 @@ async function doLogin() {
     const res = await fetch(API);
     const data = await res.json();
     
-    if(!data.users || data.users.length === 0) {
-        return Swal.fire("Error", "Server se users ka data nahi mila!", "error");
-    }
-
     const user = data.users.find(u => String(u.number) === num && String(u.password) === pass);
 
     if(!user) {
         return Swal.fire("Ghalti", "Invalid number ya password!", "error");
     }
     
-    // Security: Device ID check
+    // Security: Only allow login from the registered device
     if(user.device_id !== current_device_id) {
         return Swal.fire({
             title: "⚠️ Security Alert",
-            html: "Ye account kisi aur device ka hai!<br><br><small>Agar ye aap ka account hai to us device se login karein.</small>",
-            icon: "error",
-            confirmButtonColor: "#ff4d4d"
+            html: "Ye account kisi aur device par register hai!<br><small>Wapsi usi phone se login karein.</small>",
+            icon: "error"
         });
     }
 
@@ -159,16 +165,16 @@ async function doLogin() {
     window.location.href = "dashboard.html";
     
   } catch(e) { 
-    console.error(e);
-    Swal.fire("Error", "Server issues! Apps Script deployment check karein.", "error"); 
+    Swal.fire("Error", "Server connectivity issue!", "error"); 
   }
 }
 
+// ✅ 4. REGISTER LOGIC (Anti-Duplicate & Anti-Cheat)
 async function doRegister() {
   const name = document.getElementById("r-name").value.trim();
   const num = document.getElementById("r-num").value.trim();
   const pass = document.getElementById("r-pass").value.trim();
-  const ref = document.getElementById("r-ref").value.trim();
+  const ref = document.getElementById("r-ref").value.trim() || "DIRECT";
   const terms = document.getElementById("terms-chk").checked;
 
   if(!name || !num || !pass) return Swal.fire("Rukiye!", "Saray fields bharna lazmi hain.", "warning");
@@ -179,33 +185,24 @@ async function doRegister() {
   try {
     const res = await fetch(API);
     const data = await res.json();
-    const users = data.users;
+    const users = data.users || [];
 
-    // ✅ CORRECT LOGIC: Check if THIS SPECIFIC number already exists
-    const existingNumber = users.find(u => String(u.number) === num);
-    if(existingNumber) {
+    // CHECK A: Phone number must be unique
+    if(users.some(u => String(u.number) === num)) {
+        return Swal.fire("Ghalti", "Ye number pehle se registered hai!", "warning");
+    }
+
+    // CHECK B: Device must be unique (Only 1 account per phone)
+    if(users.some(u => u.device_id === current_device_id)) {
+        const existing = users.find(u => u.device_id === current_device_id);
         return Swal.fire({
-            title: "❌ Number Already Registered",
-            html: `Phone number <b>${num}</b> pehle se registered hai.<br><br>Agar aap ka account hai to <b>Login</b> karein.`,
-            icon: "warning",
-            confirmButtonColor: "#fbbf24"
+            title: "⚠️ Device Limit",
+            html: `Is device par pehle se account bana hua hai:<br><b>${existing.name}</b>`,
+            icon: "error"
         });
     }
 
-    // ✅ CORRECT LOGIC: Check if THIS SPECIFIC device already has account
-    const existingDevice = users.find(u => u.device_id === current_device_id);
-    if(existingDevice) {
-        return Swal.fire({
-            title: "⚠️ Device Already Used",
-            html: `Is device par pehle se account bana hua hai:<br><br><b>${existingDevice.name}</b> (${existingDevice.number})<br><br>Ek device par sirf <b>ek account</b> allowed hai.`,
-            icon: "error",
-            confirmButtonColor: "#ff4d4d"
-        });
-    }
-
-    // ✅ Both checks passed - Create account
-    const newIdCount = users.length + 1;
-    const auto_id = "PS" + String(newIdCount).padStart(4, '0');
+    const auto_id = "PS" + String(users.length + 1).padStart(4, '0');
 
     const payload = {
       key: KEY,
@@ -219,27 +216,24 @@ async function doRegister() {
       user_id: auto_id
     };
 
-    fetch(API, {
+    // Removed "no-cors" to get proper response
+    await fetch(API, {
       method: "POST",
-      mode: "no-cors",
       body: JSON.stringify(payload)
+    });
+
+    Swal.fire({
+      title: "✅ Kamyabi!",
+      html: `Account ban gaya!<br>ID: <b style="color:#fbbf24;">${auto_id}</b>`,
+      icon: "success"
     }).then(() => {
-      Swal.fire({
-        title: "✅ Kamyabi!",
-        html: `Account ban gaya hai!<br><br>Your ID: <b style="color:#fbbf24;">${auto_id}</b><br><br>Ab <b>Login</b> karein.`,
-        icon: "success",
-        confirmButtonColor: "#10b981"
-      }).then(() => {
-          // Auto-fill login form
-          document.getElementById("l-num").value = num;
-          document.getElementById("l-pass").value = pass;
-          switchTab('login');
-      });
+        document.getElementById("l-num").value = num;
+        document.getElementById("l-pass").value = pass;
+        switchTab('login');
     });
 
   } catch(e) {
-    console.error(e);
-    Swal.fire("Error", "Server issues", "error");
+    Swal.fire("Error", "Registration failed. Try again.", "error");
   }
 }
 </script>
