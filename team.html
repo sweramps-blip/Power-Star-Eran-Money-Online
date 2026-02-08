@@ -9,8 +9,8 @@
     <style>
         :root { --gold: #fbbf24; --bg: #0a0e1a; --card: #1a1f35; --border: #2d3548; --text-secondary: #94a3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; padding: 15px; line-height: 1.4; }
-        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 5px; }
+        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; padding: 15px; line-height: 1.4; overflow-x: hidden; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
         .back-link { color: var(--gold); text-decoration: none; font-size: 14px; font-weight: 600; background: rgba(251, 191, 36, 0.1); padding: 6px 12px; border-radius: 10px; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .level-card { padding: 15px 10px; border-radius: 18px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
@@ -51,7 +51,7 @@
     <div class="invite-section">
         <p style="font-size: 13px; font-weight: 700;"><i class="fa-solid fa-user-plus" style="color:var(--gold); margin-right:5px;"></i> Invite Friends</p>
         <div class="ref-box">
-            <span id="ref-link" style="font-size: 11px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; max-width: 80%;">Loading...</span>
+            <span id="ref-link" style="font-size: 11px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; max-width: 80%;">Generating Link...</span>
             <i class="fa-solid fa-copy" onclick="copyRef()" style="color: var(--gold); font-size: 16px; cursor:pointer;"></i>
         </div>
         
@@ -68,20 +68,21 @@
             <span style="font-size: 10px; color: var(--text-secondary); background: rgba(251, 191, 36, 0.1); padding: 2px 8px; border-radius: 20px;">Withdrawal Verified</span>
         </div>
         <div id="member-list">
-            <p style="text-align:center; font-size:12px; color:var(--text-secondary); padding:20px;">Loading members...</p>
-        </div>
+            </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const API_URL = "YOUR_NEW_DEPLOYMENT_URL";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxObefF4VLYoZNtoqW2h4XXdz60x_4_d7OFUVwy4xlw_SLY3LoKE-mMumpU05gyXlQ-/exec";
 
         async function initTeam() {
             const user = JSON.parse(localStorage.getItem("ps_user"));
             if(!user) { window.location.href="index.html"; return; }
 
-            // Automatic Link
-            const link = window.location.origin + window.location.pathname.replace('team.html', 'index.html') + "?ref=" + user.user_id;
+            // Automatic Referral Link Logic
+            const currentPath = window.location.pathname;
+            const folderPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            const link = window.location.origin + folderPath + "/index.html?ref=" + user.user_id;
             document.getElementById("ref-link").innerText = link;
 
             try {
@@ -91,18 +92,26 @@
                 let l1=0, l2=0, listHtml="";
                 
                 if(data.tx) {
-                    data.tx.filter(t => t.status === "Approved").forEach(t => {
-                        let role = "", comm = 0;
-                        if(String(t.up1) === String(user.user_id)) { role="Level 1"; comm=50; l1+=50; }
-                        else if(String(t.up2) === String(user.user_id)) { role="Level 2"; comm=20; l2+=20; }
+                    data.tx.forEach(t => {
+                        if(t.status === "Approved") {
+                            let role = "", comm = 0;
+                            if(String(t.up1) === String(user.user_id)) { role="Level 1"; comm=50; l1+=50; }
+                            else if(String(t.up2) === String(user.user_id)) { role="Level 2"; comm=20; l2+=20; }
 
-                        if(role) {
-                            const mem = data.users.find(u => String(u.user_id) === String(t.uid));
-                            const name = mem ? mem.name : "Member "+t.uid;
-                            listHtml += `<div class="member-item">
-                                <div><p style="font-size:13px; font-weight:700;">${name}</p><p style="font-size:9px; color:var(--text-secondary);">${role} Verified</p></div>
-                                <div style="text-align:right;"><p style="font-size:12px; color:#10b981; font-weight:800;">+Rs. ${comm}</p></div>
-                            </div>`;
+                            if(role) {
+                                const mem = data.users.find(u => String(u.user_id) === String(t.uid));
+                                const name = mem ? mem.name : "Member "+t.uid;
+                                listHtml += `
+                                <div class="member-item">
+                                    <div>
+                                        <p style="font-size:13px; font-weight:700;">${name}</p>
+                                        <p style="font-size:9px; color:var(--text-secondary);">${role} Commission</p>
+                                    </div>
+                                    <div style="text-align:right;">
+                                        <p style="font-size:12px; color:#10b981; font-weight:800;">+Rs. ${comm}</p>
+                                    </div>
+                                </div>`;
+                            }
                         }
                     });
                 }
@@ -110,21 +119,23 @@
                 document.getElementById("l1-earn").innerText = "Rs. " + l1;
                 document.getElementById("l2-earn").innerText = "Rs. " + l2;
                 document.getElementById("total-comm").innerText = "Rs. " + (l1 + l2).toFixed(2);
-                document.getElementById("member-list").innerHTML = listHtml || "<p style='text-align:center; font-size:11px; opacity:0.5;'>No active members yet.</p>";
+                document.getElementById("member-list").innerHTML = listHtml || "<p style='text-align:center; font-size:11px; opacity:0.5; padding:20px;'>No active members yet.</p>";
 
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Sync Error"); }
         }
 
         function copyRef() {
-            navigator.clipboard.writeText(document.getElementById("ref-link").innerText);
+            const link = document.getElementById("ref-link").innerText;
+            navigator.clipboard.writeText(link);
             Swal.fire({ title: 'Copied!', icon: 'success', timer: 1000, showConfirmButton: false });
         }
 
         function share(p) {
-            const msg = encodeURIComponent("Join Power Star & Earn: " + document.getElementById("ref-link").innerText);
+            const link = document.getElementById("ref-link").innerText;
+            const msg = encodeURIComponent("Join Power Star & Start Earning! Link: " + link);
             if(p==='wa') window.open("https://wa.me/?text="+msg);
-            if(p==='tg') window.open("https://t.me/share/url?url="+msg);
-            if(p==='fb') window.open("https://www.facebook.com/sharer/sharer.php?u="+msg);
+            if(p==='tg') window.open("https://t.me/share/url?url="+link+"&text="+msg);
+            if(p==='fb') window.open("https://www.facebook.com/sharer/sharer.php?u="+link);
         }
 
         window.onload = initTeam;
