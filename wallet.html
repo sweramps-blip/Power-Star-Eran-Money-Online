@@ -293,7 +293,6 @@
                 </div>
                 <div class="rule-item">Minimum withdrawal amount is Rs. 500</div>
                 <div class="rule-item">5% withdrawal fee will be charged</div>
-                <div class="rule-item">At least 1 referral is required for withdrawal</div>
             </div>
             <div class="input-wrapper">
                 <label class="input-label">Amount (Min Rs. 500)</label>
@@ -319,10 +318,10 @@
 
         <!-- Social Links -->
         <div class="social-grid">
-            <a href="https://t.me/+wrV-LempJ39lY2Fk" target="_blank" class="social-btn" style="background: linear-gradient(135deg, #0088cc, #006699);">
+            <a href="https://t.me/+wrV-LempJ39lY2Fk" class="social-btn" style="background: linear-gradient(135deg, #0088cc, #006699);">
                 <i class="fab fa-telegram-plane"></i> Telegram
             </a>
-            <a href="https://whatsapp.com/channel/0029VbBtlLd29752E8E2z10W" target="_blank" class="social-btn" style="background: linear-gradient(135deg, #25d366, #128c7e);">
+            <a href="https://whatsapp.com/channel/0029VbBtlLd29752E8E2z10W" class="social-btn" style="background: linear-gradient(135deg, #25d366, #128c7e);">
                 <i class="fab fa-whatsapp"></i> WhatsApp
             </a>
         </div>
@@ -362,7 +361,7 @@ async function loadWallet() {
             document.getElementById("user-meta").innerText = user.name + " • " + user.user_id;
             
             // Check if account is bound
-            if (user.account_no && user.account_title) {
+            if (user.account_no && user.account_no.trim() !== '' && user.account_title && user.account_title.trim() !== '') {
                 // Hide binding form, show account details
                 document.getElementById("bind-account-section").classList.add("hidden");
                 document.getElementById("account-details-section").classList.remove("hidden");
@@ -372,9 +371,20 @@ async function loadWallet() {
                 document.getElementById("display-account-type").innerText = user.account_type || "Easypaisa";
                 document.getElementById("display-account-no").innerText = user.account_no;
             } else {
-                // Show binding form
+                // Show binding form, hide account details
                 document.getElementById("bind-account-section").classList.remove("hidden");
                 document.getElementById("account-details-section").classList.add("hidden");
+                
+                // Pre-fill if data exists
+                if (user.account_no) {
+                    document.getElementById("bind-account-no").value = user.account_no;
+                }
+                if (user.account_type) {
+                    document.getElementById("bind-account-type").value = user.account_type;
+                }
+                if (user.account_title) {
+                    document.getElementById("bind-account-title").value = user.account_title;
+                }
             }
         }
         
@@ -483,17 +493,6 @@ async function submitWithdraw() {
     
     if (!amount || amount < 500) {
         Swal.fire("Invalid Amount", "Minimum withdrawal is Rs. 500", "warning");
-        return;
-    }
-    
-    // Check for referral requirement
-    const referralCount = currentUser.referrals || 0;
-    if (referralCount < 1) {
-        Swal.fire({
-            title: "Referral Required",
-            html: "At least <b>1 referral</b> is required to withdraw funds.<br>Share your referral link and invite friends!",
-            icon: "warning"
-        });
         return;
     }
     
