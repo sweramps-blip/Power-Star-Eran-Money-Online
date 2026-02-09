@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Star | Master Admin Panel</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #fbbf24; --bg: #0a0e1a; --card: #161b2e; --border: #2d3548; --text: #94a3b8; }
+        body { background: var(--bg); color: white; font-family: 'Outfit', sans-serif; margin: 0; padding: 15px; display: none; } /* Hide body until login */
+        .admin-container { max-width: 600px; margin: auto; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 20px; border-top: 3px solid var(--gold); position: relative; }
+        h3 { color: var(--gold); margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+        label { font-size: 11px; color: var(--text); text-transform: uppercase; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; background: #0a0e1a; border: 1px solid var(--border); color: white; border-radius: 8px; margin: 5px 0 15px 0; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--gold); }
+        .btn { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 8px; font-weight: 800; cursor: pointer; color: #000; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .wdr-item { background: #0a0e1a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--gold); font-size: 13px; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .status-pending { background: #f97316; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h2 style="text-align: center; color: var(--gold); letter-spacing: 2px;">POWER STAR <span style="color:white">ADMIN</span></h2>
+
+    <div class="card">
+        <h3><i class="fas fa-coins"></i> Fund Disbursement</h3>
+        <label>User ID</label>
+        <input type="text" id="credit-uid" placeholder="e.g. PS0001">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Amount (PKR)</label>
+                <input type="number" id="credit-amt" placeholder="0.00">
+            </div>
+            <div>
+                <label>Type (History Text)</label>
+                <select id="credit-type">
+                    <option value="Salary">Salary 💼</option>
+                    <option value="Reward">Reward 🎁</option>
+                    <option value="Prize">Prize 🏆</option>
+                    <option value="Coins">Coins 💰</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn" onclick="sendFunds()">Credit Wallet & History</button>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-search"></i> Search Team Member</h3>
+        <div style="display: flex; gap: 8px;">
+            <input type="text" id="search-id" placeholder="User ID..." style="margin:0">
+            <button onclick="findUser()" style="background:white; color:black; border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer;">FIND</button>
+        </div>
+        <div id="search-result" style="margin-top:15px; display:none; background:#0a0e1a; padding:10px; border-radius:8px; font-size:13px; line-height:1.6;"></div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-receipt"></i> Pending Withdrawals</h3>
+        <div id="wdr-list"><p style="text-align:center; color:gray;">Checking requests...</p></div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-tv"></i> Dashboard Management</h3>
+        <label>Scrolling News Text</label>
+        <textarea id="dash-news" placeholder="Enter latest updates..."></textarea>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div>
+                <label>Media Type</label>
+                <select id="media-type">
+                    <option value="image">Image URL</option>
+                    <option value="video">YouTube ID</option>
+                </select>
+            </div>
+            <div>
+                <label>Link / ID</label>
+                <input type="text" id="media-val" placeholder="Paste here">
+            </div>
+        </div>
+        <button class="btn" style="background:#fff" onclick="updateDashboard()">Update Dashboard Content</button>
+    </div>
+</div>
+
+<script>
+// --- CONFIGURATION ---
+const API = "https://script.google.com/macros/s/AKfycbxW--R0HxV_5qUYNh4hMq4U8PXgWxQCg1Ghsw1j6IGN02neoJR2PA6n9g8B5y0Uv9H2/exec";
+const MASTER_KEY = "POWER_STAR_786_SECURE";
+const ADMIN_PASS = "PS_ADMIN_2026"; // 🔑 GitHub protection password
+
+// --- SECURITY LOGIN ---
+(function authenticate() {
+    const val = prompt("Enter Master Admin Password:");
+    if(val === ADMIN_PASS) {
+        document.body.style.display = "block";
+        loadPendingWdr();
+    } else {
+        alert("Access Denied!");
+        window.location.href = "about:blank";
+    }
+})();
+
+// --- 1. SEND FUNDS ---
+async function sendFunds() {
+    const uid = document.getElementById("credit-uid").value.trim().toUpperCase();
+    const amt = document.getElementById("credit-amt").value;
+    const type = document.getElementById("credit-type").value;
+
+    if(!uid || !amt) return Swal.fire("Error", "Fill all fields", "error");
+
+    Swal.fire({title: 'Processing...', didOpen: () => Swal.showLoading()});
+    await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ key: MASTER_KEY, action: "manual_credit", user_id: uid, amount: parseFloat(amt), type: type })
+    });
+    Swal.fire("Success", `${amt} credited as ${type}`, "success");
+}
+
+// --- 2. SEARCH USER ---
+async function findUser() {
+    const sid = document.getElementById("search-id").value.trim().toUpperCase();
+    const res = await fetch(API);
+    const data = await res.json();
+    const user = data.users.find(u => u.user_id === sid);
+    const box = document.getElementById("search-result");
+    box.style.display = "block";
+    if(user) {
+        box.innerHTML = `<b style="color:var(--gold)">Name:</b> ${user.name}<br><b>Phone:</b> ${user.number}<br><b>Balance:</b> Rs. ${user.balance}<br><b>Device:</b> ${user.device_id.slice(0,10)}...`;
+    } else {
+        box.innerHTML = "<span style='color:red'>Not Found</span>";
+    }
+}
+
+// --- 3. WITHDRAWAL LOGIC ---
+async function loadPendingWdr() {
+    const res = await fetch(API);
+    const data = await res.json();
+    const pending = data.withdrawals.filter(w => w.status === "Pending");
+    const container = document.getElementById("wdr-list");
+    container.innerHTML = pending.length ? "" : "No pending requests.";
+    
+    pending.forEach(w => {
+        const div = document.createElement("div");
+        div.className = "wdr-item";
+        div.innerHTML = `
+            <b>ID: ${w.user_id}</b> | <span style="color:var(--gold)">Rs. ${w.amount}</span><br>
+            <small>${w.method} - ${w.date}</small>
+            <div style="display:flex; gap:5px; margin-top:10px;">
+                <button onclick="wdrAction('${w.user_id}', ${w.amount}, 'Approved')" style="flex:1; background:#22c55e; border:none; border-radius:4px; font-weight:bold; padding:5px;">Approve</button>
+                <button onclick="wdrAction('${w.user_id}', ${w.amount}, 'Rejected')" style="flex:1; background:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; padding:5px;">Reject</button>
+            </div>`;
+        container.appendChild(div);
+    });
+}
+
+async function wdrAction(uid, amt, status) {
+    Swal.fire({title: 'Updating...', didOpen: () => Swal.showLoading()});
+    await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ key: MASTER_KEY, action: "update_withdrawal", user_id: uid, amount: amt, status: status })
+    });
+    Swal.fire(status, `Request ${status}`, "success");
+    loadPendingWdr();
+}
+
+// --- 4. DASHBOARD UPDATE ---
+async function updateDashboard() {
+    const news = document.getElementById("dash-news").value;
+    const mType = document.getElementById("media-type").value;
+    const mLink = document.getElementById("media-val").value;
+
+    Swal.fire({title: 'Updating Dashboard...', didOpen: () => Swal.showLoading()});
+    await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ key: MASTER_KEY, action: "update_dashboard", news: news, media_type: mType, media_link: mLink })
+    });
+    Swal.fire("Success", "Dashboard content updated", "success");
+}
+</script>
+</body>
+  </html>
