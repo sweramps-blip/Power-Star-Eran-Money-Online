@@ -46,6 +46,56 @@
         /* Cards */
         .action-card { background: var(--card); border-radius: 18px; border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; }
         
+        /* Account Details Card */
+        .account-details-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .account-details-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .account-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+            z-index: 1;
+        }
+        .account-detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .detail-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+        }
+        .detail-icon {
+            color: var(--gold);
+            margin-right: 8px;
+            font-size: 13px;
+        }
+
         /* Form Elements */
         .input-wrapper { margin-bottom: 14px; }
         .input-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
@@ -68,6 +118,44 @@
         .btn-success { background: linear-gradient(135deg, var(--success), #059669); color: white; }
         .btn:active { transform: scale(0.97); }
         .btn:hover { opacity: 0.9; }
+
+        /* Withdrawal Rules */
+        .rules-box {
+            background: rgba(251, 191, 36, 0.05);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .rules-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .rule-item {
+            font-size: 12px;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+            padding-left: 18px;
+            position: relative;
+            line-height: 1.6;
+        }
+        .rule-item::before {
+            content: '•';
+            position: absolute;
+            left: 4px;
+            color: var(--gold);
+            font-weight: 900;
+        }
+        .rule-item:last-child {
+            margin-bottom: 0;
+        }
 
         /* History */
         .history-container { max-height: 300px; overflow-y: auto; }
@@ -108,6 +196,9 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-track { background: var(--card-dark); border-radius: 10px; }
         .history-container::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        /* Hidden */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -131,32 +222,64 @@
             <p class="balance-meta" id="user-meta">Loading account...</p>
         </div>
 
-        <!-- Bind Account Section -->
-        <div class="section-title">
-            <i class="fas fa-credit-card"></i> Payment Method
+        <!-- Bind Account Section (Hidden after binding) -->
+        <div id="bind-account-section">
+            <div class="section-title">
+                <i class="fas fa-credit-card"></i> Payment Method
+            </div>
+            <div class="action-card">
+                <div class="input-wrapper">
+                    <label class="input-label">Account Number</label>
+                    <input type="text" id="bind-account-no" class="input-box" placeholder="03001234567">
+                </div>
+                <div class="input-grid">
+                    <div class="input-wrapper">
+                        <label class="input-label">Payment Method</label>
+                        <select id="bind-account-type" class="input-box">
+                            <option value="Easypaisa">Easypaisa</option>
+                            <option value="JazzCash">JazzCash</option>
+                            <option value="Bank">Bank Account</option>
+                        </select>
+                    </div>
+                    <div class="input-wrapper">
+                        <label class="input-label">Account Title</label>
+                        <input type="text" id="bind-account-title" class="input-box" placeholder="Your Name">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="bindAccount()">
+                    <i class="fas fa-save"></i> Update Details
+                </button>
+            </div>
         </div>
-        <div class="action-card">
-            <div class="input-wrapper">
-                <label class="input-label">Account Number</label>
-                <input type="text" id="bind-account-no" class="input-box" placeholder="03001234567">
+
+        <!-- Account Details Card (Shown after binding) -->
+        <div id="account-details-section" class="hidden">
+            <div class="section-title">
+                <i class="fas fa-credit-card"></i> Payment Method
             </div>
-            <div class="input-grid">
-                <div class="input-wrapper">
-                    <label class="input-label">Payment Method</label>
-                    <select id="bind-account-type" class="input-box">
-                        <option value="Easypaisa">Easypaisa</option>
-                        <option value="JazzCash">JazzCash</option>
-                        <option value="Bank">Bank Account</option>
-                    </select>
+            <div class="account-details-card">
+                <div class="account-detail-row">
+                    <div>
+                        <i class="fas fa-user detail-icon"></i>
+                        <span class="detail-label">Account Title</span>
+                    </div>
+                    <span class="detail-value" id="display-account-title">-</span>
                 </div>
-                <div class="input-wrapper">
-                    <label class="input-label">Account Title</label>
-                    <input type="text" id="bind-account-title" class="input-box" placeholder="Your Name">
+                <div class="account-detail-row">
+                    <div>
+                        <i class="fas fa-wallet detail-icon"></i>
+                        <span class="detail-label">Payment Method</span>
+                    </div>
+                    <span class="detail-value" id="display-account-type">-</span>
+                </div>
+                <div class="account-detail-row">
+                    <div>
+                        <i class="fas fa-hashtag detail-icon"></i>
+                        <span class="detail-label">Account Number</span>
+                    </div>
+                    <span class="detail-value" id="display-account-no">-</span>
                 </div>
             </div>
-            <button class="btn btn-primary" onclick="bindAccount()">
-                <i class="fas fa-save"></i> Update Details
-            </button>
         </div>
 
         <!-- Withdraw Section -->
@@ -164,6 +287,14 @@
             <i class="fas fa-hand-holding-usd"></i> Withdraw Funds
         </div>
         <div class="action-card">
+            <div class="rules-box">
+                <div class="rules-title">
+                    <i class="fas fa-info-circle"></i> Withdrawal Rules
+                </div>
+                <div class="rule-item">Minimum withdrawal amount is Rs. 500</div>
+                <div class="rule-item">5% withdrawal fee will be charged</div>
+                <div class="rule-item">At least 1 referral is required for withdrawal</div>
+            </div>
             <div class="input-wrapper">
                 <label class="input-label">Amount (Min Rs. 500)</label>
                 <input type="number" id="withdraw-amount" class="input-box" placeholder="Enter amount">
@@ -230,10 +361,20 @@ async function loadWallet() {
             document.getElementById("balance-amount").innerText = "Rs. " + (user.balance || 0).toFixed(2);
             document.getElementById("user-meta").innerText = user.name + " • " + user.user_id;
             
-            if (user.account_no) {
-                document.getElementById("bind-account-no").value = user.account_no;
-                document.getElementById("bind-account-type").value = user.account_type;
-                document.getElementById("bind-account-title").value = user.account_title;
+            // Check if account is bound
+            if (user.account_no && user.account_title) {
+                // Hide binding form, show account details
+                document.getElementById("bind-account-section").classList.add("hidden");
+                document.getElementById("account-details-section").classList.remove("hidden");
+                
+                // Display account details
+                document.getElementById("display-account-title").innerText = user.account_title;
+                document.getElementById("display-account-type").innerText = user.account_type || "Easypaisa";
+                document.getElementById("display-account-no").innerText = user.account_no;
+            } else {
+                // Show binding form
+                document.getElementById("bind-account-section").classList.remove("hidden");
+                document.getElementById("account-details-section").classList.add("hidden");
             }
         }
         
@@ -324,6 +465,14 @@ async function bindAccount() {
         currentUser.account_title = accountTitle;
         localStorage.setItem("ps_user", JSON.stringify(currentUser));
         
+        // Hide form and show details
+        document.getElementById("bind-account-section").classList.add("hidden");
+        document.getElementById("account-details-section").classList.remove("hidden");
+        
+        document.getElementById("display-account-title").innerText = accountTitle;
+        document.getElementById("display-account-type").innerText = accountType;
+        document.getElementById("display-account-no").innerText = accountNo;
+        
     } catch (e) {
         Swal.fire("Error", "Update failed. Try again.", "error");
     }
@@ -337,8 +486,27 @@ async function submitWithdraw() {
         return;
     }
     
-    if (amount > currentUser.balance) {
-        Swal.fire("Insufficient Balance", "You don't have enough balance", "error");
+    // Check for referral requirement
+    const referralCount = currentUser.referrals || 0;
+    if (referralCount < 1) {
+        Swal.fire({
+            title: "Referral Required",
+            html: "At least <b>1 referral</b> is required to withdraw funds.<br>Share your referral link and invite friends!",
+            icon: "warning"
+        });
+        return;
+    }
+    
+    // Calculate 5% fee
+    const fee = amount * 0.05;
+    const totalDeduction = amount + fee;
+    
+    if (totalDeduction > currentUser.balance) {
+        Swal.fire({
+            title: "Insufficient Balance",
+            html: `Amount: Rs. ${amount}<br>Fee (5%): Rs. ${fee.toFixed(2)}<br>Total: Rs. ${totalDeduction.toFixed(2)}<br><br>Your balance is insufficient.`,
+            icon: "error"
+        });
         return;
     }
     
@@ -346,6 +514,27 @@ async function submitWithdraw() {
         Swal.fire("Payment Method Required", "Please add your payment details first", "warning");
         return;
     }
+    
+    // Show confirmation with fee breakdown
+    const result = await Swal.fire({
+        title: 'Confirm Withdrawal',
+        html: `
+            <div style="text-align: left; padding: 10px;">
+                <p style="margin: 8px 0;"><b>Amount:</b> Rs. ${amount}</p>
+                <p style="margin: 8px 0;"><b>Fee (5%):</b> Rs. ${fee.toFixed(2)}</p>
+                <p style="margin: 8px 0; border-top: 1px solid #ccc; padding-top: 8px;"><b>You'll receive:</b> Rs. ${amount.toFixed(2)}</p>
+                <p style="margin: 8px 0;"><b>Total deduction:</b> Rs. ${totalDeduction.toFixed(2)}</p>
+            </div>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#10b981',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel'
+    });
+    
+    if (!result.isConfirmed) return;
     
     Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
     
@@ -363,7 +552,7 @@ async function submitWithdraw() {
         
         Swal.fire({
             title: "Request Submitted!",
-            html: `Your withdrawal of <b>Rs. ${amount}</b> is being processed.`,
+            html: `Your withdrawal of <b>Rs. ${amount}</b> is being processed.<br><small>Fee: Rs. ${fee.toFixed(2)}</small>`,
             icon: "success"
         });
         
