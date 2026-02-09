@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -360,31 +360,20 @@ async function loadWallet() {
             document.getElementById("balance-amount").innerText = "Rs. " + (user.balance || 0).toFixed(2);
             document.getElementById("user-meta").innerText = user.name + " • " + user.user_id;
             
-            // Check if account is bound
-            if (user.account_no && user.account_no.trim() !== '' && user.account_title && user.account_title.trim() !== '') {
-                // Hide binding form, show account details
+            // Check if account is bound and toggle visibility
+            if (user.account_no && user.account_title) {
+                // Hide form, show details card
                 document.getElementById("bind-account-section").classList.add("hidden");
                 document.getElementById("account-details-section").classList.remove("hidden");
                 
-                // Display account details
+                // Fill account details in card
                 document.getElementById("display-account-title").innerText = user.account_title;
                 document.getElementById("display-account-type").innerText = user.account_type || "Easypaisa";
                 document.getElementById("display-account-no").innerText = user.account_no;
             } else {
-                // Show binding form, hide account details
+                // Show form, hide details card
                 document.getElementById("bind-account-section").classList.remove("hidden");
                 document.getElementById("account-details-section").classList.add("hidden");
-                
-                // Pre-fill if data exists
-                if (user.account_no) {
-                    document.getElementById("bind-account-no").value = user.account_no;
-                }
-                if (user.account_type) {
-                    document.getElementById("bind-account-type").value = user.account_type;
-                }
-                if (user.account_title) {
-                    document.getElementById("bind-account-title").value = user.account_title;
-                }
             }
         }
         
@@ -586,4 +575,4 @@ window.onload = loadWallet;
 </script>
 
 </body>
-</html>
+</html>     
