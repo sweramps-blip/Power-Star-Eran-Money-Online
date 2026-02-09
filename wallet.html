@@ -1,4 +1,4 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -95,7 +95,7 @@
             margin-right: 8px;
             font-size: 13px;
         }
-
+        
         /* Form Elements */
         .input-wrapper { margin-bottom: 14px; }
         .input-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 0.5px; }
@@ -196,7 +196,7 @@
         .history-container::-webkit-scrollbar { width: 4px; }
         .history-container::-webkit-scrollbar-track { background: var(--card-dark); border-radius: 10px; }
         .history-container::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
-
+        
         /* Hidden */
         .hidden { display: none !important; }
     </style>
@@ -222,7 +222,7 @@
             <p class="balance-meta" id="user-meta">Loading account...</p>
         </div>
 
-        <!-- Bind Account Section (Hidden after binding) -->
+        <!-- Bind Account Section -->
         <div id="bind-account-section">
             <div class="section-title">
                 <i class="fas fa-credit-card"></i> Payment Method
@@ -252,7 +252,7 @@
             </div>
         </div>
 
-        <!-- Account Details Card (Shown after binding) -->
+        <!-- Account Details Card (Hidden initially, shown after binding) -->
         <div id="account-details-section" class="hidden">
             <div class="section-title">
                 <i class="fas fa-credit-card"></i> Payment Method
@@ -360,18 +360,16 @@ async function loadWallet() {
             document.getElementById("balance-amount").innerText = "Rs. " + (user.balance || 0).toFixed(2);
             document.getElementById("user-meta").innerText = user.name + " • " + user.user_id;
             
-            // Check if account is bound and toggle visibility
-            if (user.account_no && user.account_title) {
-                // Hide form, show details card
+            if (user.account_no) {
+                // Account bound - hide form, show card
                 document.getElementById("bind-account-section").classList.add("hidden");
                 document.getElementById("account-details-section").classList.remove("hidden");
                 
-                // Fill account details in card
                 document.getElementById("display-account-title").innerText = user.account_title;
-                document.getElementById("display-account-type").innerText = user.account_type || "Easypaisa";
+                document.getElementById("display-account-type").innerText = user.account_type;
                 document.getElementById("display-account-no").innerText = user.account_no;
             } else {
-                // Show form, hide details card
+                // Account not bound - show form
                 document.getElementById("bind-account-section").classList.remove("hidden");
                 document.getElementById("account-details-section").classList.add("hidden");
             }
@@ -464,7 +462,7 @@ async function bindAccount() {
         currentUser.account_title = accountTitle;
         localStorage.setItem("ps_user", JSON.stringify(currentUser));
         
-        // Hide form and show details
+        // Hide form, show card
         document.getElementById("bind-account-section").classList.add("hidden");
         document.getElementById("account-details-section").classList.remove("hidden");
         
@@ -485,16 +483,8 @@ async function submitWithdraw() {
         return;
     }
     
-    // Calculate 5% fee
-    const fee = amount * 0.05;
-    const totalDeduction = amount + fee;
-    
-    if (totalDeduction > currentUser.balance) {
-        Swal.fire({
-            title: "Insufficient Balance",
-            html: `Amount: Rs. ${amount}<br>Fee (5%): Rs. ${fee.toFixed(2)}<br>Total: Rs. ${totalDeduction.toFixed(2)}<br><br>Your balance is insufficient.`,
-            icon: "error"
-        });
+    if (amount > currentUser.balance) {
+        Swal.fire("Insufficient Balance", "You don't have enough balance", "error");
         return;
     }
     
@@ -502,27 +492,6 @@ async function submitWithdraw() {
         Swal.fire("Payment Method Required", "Please add your payment details first", "warning");
         return;
     }
-    
-    // Show confirmation with fee breakdown
-    const result = await Swal.fire({
-        title: 'Confirm Withdrawal',
-        html: `
-            <div style="text-align: left; padding: 10px;">
-                <p style="margin: 8px 0;"><b>Amount:</b> Rs. ${amount}</p>
-                <p style="margin: 8px 0;"><b>Fee (5%):</b> Rs. ${fee.toFixed(2)}</p>
-                <p style="margin: 8px 0; border-top: 1px solid #ccc; padding-top: 8px;"><b>You'll receive:</b> Rs. ${amount.toFixed(2)}</p>
-                <p style="margin: 8px 0;"><b>Total deduction:</b> Rs. ${totalDeduction.toFixed(2)}</p>
-            </div>
-        `,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#10b981',
-        cancelButtonColor: '#6b7280',
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel'
-    });
-    
-    if (!result.isConfirmed) return;
     
     Swal.fire({ title: 'Processing...', didOpen: () => Swal.showLoading() });
     
@@ -540,7 +509,7 @@ async function submitWithdraw() {
         
         Swal.fire({
             title: "Request Submitted!",
-            html: `Your withdrawal of <b>Rs. ${amount}</b> is being processed.<br><small>Fee: Rs. ${fee.toFixed(2)}</small>`,
+            html: `Your withdrawal of <b>Rs. ${amount}</b> is being processed.`,
             icon: "success"
         });
         
@@ -575,4 +544,4 @@ window.onload = loadWallet;
 </script>
 
 </body>
-</html>     
+</html>
