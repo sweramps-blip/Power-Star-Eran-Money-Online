@@ -387,24 +387,18 @@ function loadHistory(withdrawals) {
     const historyList = document.getElementById("history-list");
     
     if (!withdrawals || withdrawals.length === 0) {
-        historyList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>No withdrawals yet</p>
-            </div>
-        `;
+        historyList.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>No transactions yet</p></div>`;
         return;
     }
     
-    const userWithdrawals = withdrawals.filter(w => String(w.user_id) === String(currentUser.user_id));
+    // 🔥 یہاں فلٹر لگایا ہے تاکہ والٹ میں ریوارڈ نظر نہ آئے
+    const userWithdrawals = withdrawals.filter(w => 
+        String(w.user_id) === String(currentUser.user_id) && 
+        ["Pending", "Approved", "Rejected"].includes(w.status)
+    );
     
     if (userWithdrawals.length === 0) {
-        historyList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <p>No withdrawals yet</p>
-            </div>
-        `;
+        historyList.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>No withdrawals yet</p></div>`;
         return;
     }
     
@@ -428,7 +422,6 @@ function loadHistory(withdrawals) {
     
     historyList.innerHTML = html;
 }
-
 async function bindAccount() {
     const accountNo = document.getElementById("bind-account-no").value.trim();
     const accountType = document.getElementById("bind-account-type").value;
