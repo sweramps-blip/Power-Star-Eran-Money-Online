@@ -266,47 +266,33 @@ async function syncDashboard() {
 // Open History Modal
 async function openHistory() {
     document.getElementById("history-modal").classList.add("show");
-    
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
     const historyBody = document.getElementById("history-body");
-    
-    historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</p>';
-    
+
     try {
         const res = await fetch(API_URL);
         const data = await res.json();
-        
-        if (!data.withdrawals || data.withdrawals.length === 0) {
-            historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;">No transactions yet</p>';
-            return;
-        }
-        
         const userHistory = data.withdrawals.filter(w => String(w.user_id) === String(localUser.user_id));
-        
-        if (userHistory.length === 0) {
-            historyBody.innerHTML = '<p style="text-align: center; color: #64748b; padding: 30px;">No transactions yet</p>';
-            return;
-        }
-        
+
         let html = '';
         userHistory.reverse().forEach(item => {
-            const date = new Date(item.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            // پروفیشنل نام سیٹ کرنا
+            let displayTitle = item.status; 
+            if(["Pending", "Approved", "Rejected"].includes(item.status)) {
+                displayTitle = "Withdrawal (" + item.status + ")";
+            }
+
             html += `
                 <div class="history-item">
                     <div class="history-item-left">
-                        <div class="history-type">Withdrawal</div>
-                        <div class="history-date">${date} • ${item.status}</div>
+                        <div class="history-type">${displayTitle}</div>
+                        <div class="history-date">${new Date(item.date).toLocaleDateString()}</div>
                     </div>
                     <div class="history-amount">Rs. ${item.amount}</div>
-                </div>
-            `;
+                </div>`;
         });
-        
         historyBody.innerHTML = html;
-        
-    } catch (e) {
-        historyBody.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 30px;">Error loading history</p>';
-    }
+    } catch (e) { historyBody.innerHTML = '<p>Error loading...</p>'; }
 }
 
 function closeHistory() {
