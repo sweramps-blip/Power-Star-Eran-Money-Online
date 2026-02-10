@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tasks | Power Star</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --btn-dark: #1a1a1a;
+            --text-main: #333;
+            --text-sub: #888;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-main);
+            padding: 0 0 40px 0;
+        }
+
+        /* Top Wallet Section */
+        .header-wallet {
+            background: #fff;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
+
+        .coin-display {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--btn-dark);
+        }
+
+        /* Container */
+        .container { padding: 15px; }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 10px 0 20px 5px;
+        }
+
+        /* Task Cards */
+        .task-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .task-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+        }
+
+        .task-details { flex: 1; }
+        .task-details h3 { font-size: 16px; margin-bottom: 4px; }
+        .task-details p { font-size: 12px; color: var(--text-sub); }
+
+        .btn-get {
+            background: var(--btn-dark);
+            color: #d4ff00; 
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Wallet ID & Send Section */
+        .wallet-section {
+            background: #fff;
+            margin: 25px 15px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .wallet-section h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .wallet-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .wallet-input:focus { border-color: var(--btn-dark); }
+
+        .btn-send {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-send:active { transform: scale(0.98); }
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="header-wallet">
+        <p style="font-size: 14px; color: #888; margin-bottom: 5px;">Your Total Balance</p>
+        <div class="coin-display"><span id="coinTotal">0</span> <small style="font-size: 16px; font-weight: 400;">Coins</small></div>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">Available tasks</h2>
+
+        <div class="task-card">
+            <div class="task-icon" style="background: #fff3e0;">🔥</div>
+            <div class="task-details">
+                <h3>Hot Marketing Task</h3>
+                <p>High Priority Task</p>
+            </div>
+            <button class="btn-get" onclick="doTask(500, 'https://google.com')">Get</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-icon" style="background: #e1f5fe;">💎</div>
+            <div class="task-details">
+                <h3>Premium Bonus Task</h3>
+                <p>Exclusive Rewards</p>
+            </div>
+            <button class="btn-get" onclick="doTask(1000, 'https://google.com')">Get</button>
+        </div>
+
+        <div class="task-card">
+            <div class="task-icon" style="background: #e8f5e9;">🚀</div>
+            <div class="task-details">
+                <h3>Speed Viral Task</h3>
+                <p>Global Promotion</p>
+            </div>
+            <button class="btn-get" onclick="doTask(300, 'https://google.com')">Get</button>
+        </div>
+
+        <div class="wallet-section">
+            <h3>Transfer Earnings</h3>
+            <div class="input-group">
+                <input type="text" id="walletID" class="wallet-input" placeholder="Enter Wallet ID (e.g. PS-9922)">
+                <button class="btn-send" onclick="sendCoins()">
+                    <i class="fas fa-paper-plane"></i> Send Coins
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coins = 0;
+
+        // Task Function
+        function doTask(reward, url) {
+            window.open(url, '_blank');
+            Swal.fire({
+                title: 'Verifying Task...',
+                timer: 2500,
+                showConfirmButton: false,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                coins += reward;
+                document.getElementById('coinTotal').innerText = coins;
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: reward + ' Coins Added to Wallet',
+                    timer: 1500
+                });
+            });
+        }
+
+        // Send Coins Logic
+        function sendCoins() {
+            let walletID = document.getElementById('walletID').value.trim();
+            
+            if(walletID === "") {
+                Swal.fire('Error', 'Please enter a valid Wallet ID', 'error');
+                return;
+            }
+
+            if(coins <= 0) {
+                Swal.fire('No Balance', 'You do not have enough coins to send', 'warning');
+                return;
+            }
+
+            Swal.fire({
+                title: 'Transferring...',
+                text: `Sending ${coins} coins to ${walletID}`,
+                icon: 'info',
+                timer: 2000,
+                showConfirmButton: false,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                Swal.fire('Transfer Success!', `${coins} coins sent successfully to ${walletID}`, 'success');
+                coins = 0;
+                document.getElementById('coinTotal').innerText = coins;
+                document.getElementById('walletID').value = "";
+            });
+        }
+    </script>
+</body>
+</html>
