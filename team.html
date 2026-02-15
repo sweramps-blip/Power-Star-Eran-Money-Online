@@ -74,14 +74,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
+        
         async function initTeam() {
             const user = JSON.parse(localStorage.getItem("ps_user"));
             if(!user) { window.location.href="index.html"; return; }
 
-            // Automatic Referral Link Logic
+            // ✅ بہتر ریفرل لنک لاجک (تاکہ Auth Page پر کوڈ خود بخود جائے)
             const currentPath = window.location.pathname;
             const folderPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-            const link = window.location.origin + folderPath + "/index.html?ref=" + user.user_id;
+            // ہم نے یہاں 'index.html' کی جگہ 'auth.html' کیا ہے تاکہ براہ راست رجسٹریشن پیج کھلے
+            const link = window.location.origin + folderPath + "/auth.html?ref=" + user.user_id;
             document.getElementById("ref-link").innerText = link;
 
             try {
