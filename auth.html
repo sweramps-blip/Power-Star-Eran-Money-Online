@@ -134,7 +134,7 @@ function checkStrength() {
 }
 
 // ✅ 3. LOGIN LOGIC (With Device Lock)
-async function login() {
+  async function login() {
     const num = document.getElementById('login_num').value.trim();
     const pass = document.getElementById('login_pass').value.trim();
 
@@ -147,33 +147,40 @@ async function login() {
         const data = await res.json();
         const users = data.users || [];
 
-        // Number aur Password check karein
+        // 1. نمبر اور پاس ورڈ سے یوزر تلاش کریں
         const user = users.find(u => String(u.number) === num && String(u.password) === pass);
 
         if(!user) {
             return Swal.fire("Ghalti", "Number ya Password galat hai!", "error");
         }
 
-        // --- DEVICE ID CHECK HATANA HAI ---
-        // Yahan pehle device check ki condition thi, usse humne hata diya hai.
-        // Ab agar number/pass sahi hai to login ho jayega.
+        // 2. آٹو اپ ڈیٹ لاجک: 
+        // اگر ڈیٹا بیس والی آئی ڈی موجودہ ڈیوائس سے الگ ہے، تو اسے اپ ڈیٹ کریں
+        if(user.device_id !== current_device_id) {
+            console.log("New device detected. Updating ID...");
+            
+            // یہاں ہم ایپ اسکرپٹ کو ایک پیغام بھیجیں گے کہ اس یوزر کی آئی ڈی بدل دو
+            await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({
+                    key: KEY,
+                    action: "update_device", // یہ ایکشن ڈیٹا بیس میں نئی آئی ڈی ڈال دے گا
+                    number: num,
+                    new_id: current_device_id
+                })
+            });
+        }
 
-        // Nayi device ID ko local storage mein update kar dein
-        user.device_id = current_device_id; 
+        // 3. لوکل ڈیٹا محفوظ کریں اور آگے بھیجیں
+        user.device_id = current_device_id;
         localStorage.setItem("ps_user", JSON.stringify(user));
-
-        Swal.fire({
-            title: "Khush Amdeed!",
-            text: "Aap kamyabi se login ho gaye hain.",
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false
-        }).then(() => {
+        
+        Swal.fire("Kamyabi!", "Aap login ho gaye hain", "success").then(() => {
             window.location.href = "dashboard.html";
         });
 
     } catch(e) {
-        Swal.fire("Error", "Server se rabta nahi ho saka!", "error");
+        Swal.fire("Error", "Check your Internet connection", "error");
     }
 }
 
