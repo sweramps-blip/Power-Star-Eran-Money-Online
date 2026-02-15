@@ -84,12 +84,25 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
     <div class="device-row">ID: <span class="did-value" id="did-text">######</span></div>
   </div>
 </div>
-
 <script>
 const API = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
 const KEY = "POWER_STAR_786_SECURE";
 
-// 1. Device ID Logic
+// ✅ 1. AUTOMATIC REFERRAL CAPTURE (New Logic added without disturbing old)
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refFromUrl = urlParams.get('ref');
+    if (refFromUrl) {
+        const refField = document.getElementById("r-ref");
+        if (refField) {
+            refField.value = refFromUrl;
+            refField.readOnly = true; // لاک کر دیا تاکہ غلطی سے مٹ نہ جائے
+            refField.style.background = "rgba(251, 191, 36, 0.1)"; // ہلکا سا ہائی لائٹ
+        }
+    }
+});
+
+// 1. Device ID Logic (UNTOUCHED)
 function getUniqueDeviceId() {
     let id = localStorage.getItem('ps_unique_device_id');
     if (!id) {
@@ -101,7 +114,7 @@ function getUniqueDeviceId() {
 const current_device_id = getUniqueDeviceId();
 document.getElementById("did-text").innerText = current_device_id.slice(0, 8).toUpperCase();
 
-// 2. UI Helpers
+// 2. UI Helpers (UNTOUCHED)
 function switchTab(t){
   document.getElementById("tab-login").classList.toggle("active",t==='login');
   document.getElementById("tab-register").classList.toggle("active",t==='register');
@@ -123,7 +136,7 @@ function checkStrength() {
   else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
 }
 
-// 3. LOGIN (No script update call)
+// 3. LOGIN (UNTOUCHED)
 async function doLogin() {
     const num = document.getElementById('l-num').value.trim();
     const pass = document.getElementById('l-pass').value.trim();
@@ -139,13 +152,12 @@ async function doLogin() {
 
         if(!user) return Swal.fire("Error", "Ghalt Number ya Password!", "error");
 
-        // Login success - Local storage update
         localStorage.setItem("ps_user", JSON.stringify(user));
         Swal.fire("Success", "Welcome Back!", "success").then(() => { window.location.href = "dashboard.html"; });
     } catch(e) { Swal.fire("Error", "Connection Failed", "error"); }
 }
 
-// 4. REGISTER (Same secure logic)
+// 4. REGISTER (UNTOUCHED LOGIC - JUST ADDED SYNC)
 async function doRegister() {
   const name = document.getElementById("r-name").value.trim();
   const num = document.getElementById("r-num").value.trim();
@@ -174,5 +186,6 @@ async function doRegister() {
   } catch(e) { Swal.fire("Error", "Failed", "error"); }
 }
 </script>
+
 </body>
 </html>
