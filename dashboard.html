@@ -246,22 +246,21 @@ async function syncDashboard() {
             const newsMarquee = document.getElementById("news-text");
             if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
-
-        const mediaBox = document.getElementById("media-content");
+const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-    mediaBox.innerHTML = `
-        <video id="dash-video" loop playsinline controls style="width:100%; height:100%; object-fit:cover;">
-            <source src="${link}" type="video/mp4">
-        </video>`;
-}
+                mediaBox.innerHTML = `
+                    <video id="dash-video" loop playsinline controls style="width:100%; height:100%; object-fit:cover;">
+                        <source src="${link}" type="video/mp4">
+                    </video>`;
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
-        }
+        } // یہ وہ بریکٹ ہے جو میڈیا کنٹینٹ کو بند کرتی ہے
+        
     } catch (e) {
         console.log("Sync Error: ", e);
     }
