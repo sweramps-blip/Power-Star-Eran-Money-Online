@@ -130,25 +130,28 @@ async function syncDashboard() {
         const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
-            const link = data.settings.media_link;
+   if (type === "video") {
+    let fileId = "";
+    // Har tarah ke Google Drive link se ID nikalne ka tareeka
+    if (link.includes("/d/")) {
+        fileId = link.split("/d/")[1].split("/")[0];
+    } else if (link.includes("id=")) {
+        fileId = link.split("id=")[1].split("&")[0];
+    }
 
-            if (type === "video") {
-                let finalLink = link;
-                // اگر لنک گوگل ڈرائیو کا ہے تو اسے اسٹریم لنک میں بدلنا
-                if (link.includes("drive.google.com")) {
-                    let fileId = "";
-                    if (link.includes("id=")) {
-                        fileId = link.split("id=")[1].split("&")[0];
-                    } else if (link.includes("/d/")) {
-                        fileId = link.split("/d/")[1].split("/")[0];
-                    }
-                    finalLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
-                }
-                
-                mediaBox.innerHTML = `
-                    <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
-                        <source src="${finalLink}" type="video/mp4">
-                    </video>`;
+    // "Makkhan" Stream Link: Ye direct video load karega
+    let finalLink = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : link;
+    
+    mediaBox.innerHTML = `
+        <video autoplay muted loop playsinline 
+               style="width:100%; height:100%; object-fit:cover; border-radius:16px;"
+               onerror="this.parentElement.innerHTML='<p style=color:red;font-size:10px;>Video Loading Error</p>'">
+            <source src="${finalLink}" type="video/mp4">
+            <source src="${link}" type="video/webm">
+        </video>`;
+}         const link = data.settings.media_link;
+
+            
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
