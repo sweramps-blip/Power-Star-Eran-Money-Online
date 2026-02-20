@@ -14,142 +14,27 @@
             --text-secondary: #94a3b8;
         }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
-        
         .header { padding: 20px; background: #131829; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        
         .user-meta { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background: #0f1423; font-size: 12px; border-bottom: 1px solid var(--border); }
         .id-badge { background: rgba(251, 191, 36, 0.1); color: var(--gold); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.3); font-weight: 700; }
-
-        .balance-card { 
-            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); 
-            padding: 30px 25px; border-radius: 24px; margin: 20px; 
-            box-shadow: 0 15px 35px rgba(217, 119, 6, 0.2);
-            text-align: center;
-            position: relative;
-        }
-        
-        /* History Icon - Top Right */
-        .history-icon { 
-            position: absolute; right: 20px; top: 20px; color: #fff; 
-            background: rgba(0,0,0,0.15); padding: 10px; border-radius: 50%; 
-            cursor: pointer; font-size: 16px; transition: 0.2s;
-        }
-        .history-icon:active { transform: scale(0.9); }
-
-        /* Income Button */
-        .income-btn {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #0a0e1a;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            margin-top: 15px;
-            display: inline-block;
-            transition: 0.2s;
-        }
-        .income-btn:active { transform: scale(0.95); }
-
-        /* History Box / Modal */
-        .history-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        .balance-card { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%); padding: 30px 25px; border-radius: 24px; margin: 20px; box-shadow: 0 15px 35px rgba(217, 119, 6, 0.2); text-align: center; position: relative; }
+        .history-icon { position: absolute; right: 20px; top: 20px; color: #fff; background: rgba(0,0,0,0.15); padding: 10px; border-radius: 50%; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .income-btn { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); color: #0a0e1a; padding: 10px 20px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; margin-top: 15px; display: inline-block; }
+        .history-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
         .history-modal.show { display: flex; }
-        
-        .history-content {
-            background: var(--card);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            max-width: 500px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        
-        .history-header {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            background: var(--card);
-            z-index: 1;
-        }
-        
-        .history-header h3 {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--gold);
-        }
-        
-        .close-modal {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid #ef4444;
-            color: #ef4444;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        
-        .history-body {
-            padding: 15px 20px;
-        }
-        
-        .history-item {
-            background: var(--card-dark);
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .history-item-left { flex: 1; }
-        .history-type { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-        .history-date { font-size: 11px; color: #64748b; font-weight: 600; }
+        .history-content { background: var(--card); border-radius: 20px; border: 1px solid var(--border); max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative; }
+        .history-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: var(--card); z-index: 1; }
+        .history-header h3 { font-size: 18px; font-weight: 800; color: var(--gold); }
+        .close-modal { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .history-body { padding: 15px 20px; }
+        .history-item { background: var(--card-dark); padding: 14px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .history-type { font-size: 14px; font-weight: 700; color: #fff; }
         .history-amount { font-size: 16px; font-weight: 900; color: var(--gold); }
-
-        .news-box { 
-            margin: 0 20px 25px; 
-            background: rgba(251, 191, 36, 0.1); 
-            border: 1px solid rgba(251, 191, 36, 0.3); 
-            padding: 10px; border-radius: 12px; 
-            display: flex; align-items: center;
-        }
+        .news-box { margin: 0 20px 25px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); padding: 10px; border-radius: 12px; display: flex; align-items: center; }
         .news-box marquee { font-size: 13px; font-weight: 600; color: #fff; }
-
-        .media-container { 
-            margin: 0 20px; 
-            background: var(--card); 
-            border-radius: 24px; 
-            padding: 12px; 
-            border: 1px solid var(--border);
-        }
-        .media-content { 
-            width: 100%; height: 220px; background: #000; border-radius: 16px; overflow: hidden; 
-            display: flex; align-items: center; justify-content: center; border: 1px solid var(--border);
-        }
+        .media-container { margin: 0 20px; background: var(--card); border-radius: 24px; padding: 12px; border: 1px solid var(--border); }
+        .media-content { width: 100%; height: 220px; background: #000; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .media-content img, .media-content video { width: 100%; height: 100%; object-fit: cover; }
-
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: #131829; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 1000; }
         .nav-link { color: var(--text-secondary); text-decoration: none; font-size: 10px; text-align: center; }
         .nav-link i { font-size: 20px; display: block; margin-bottom: 4px; }
@@ -174,15 +59,11 @@
     </div>
 
     <div class="balance-card">
-        <!-- History Icon -->
         <div class="history-icon" onclick="openHistory()">
             <i class="fa-solid fa-clock-rotate-left"></i>
         </div>
-        
         <p style="font-size:13px; font-weight:600; opacity:0.8; margin-bottom:5px;">Available Balance</p>
         <h1 style="font-size:35px; font-weight:900; margin:0;">Rs. <span id="u-bal">0.00</span></h1>
-        
-        <!-- Income Button -->
         <div class="income-btn" onclick="showIncome()">
             <i class="fa-solid fa-sack-dollar"></i> View Income
         </div>
@@ -206,7 +87,6 @@
         <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
     </nav>
 
-    <!-- History Modal -->
     <div class="history-modal" id="history-modal">
         <div class="history-content">
             <div class="history-header">
@@ -218,6 +98,7 @@
             </div>
         </div>
     </div>
+
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
 
@@ -245,13 +126,13 @@ async function syncDashboard() {
             const newsMarquee = document.getElementById("news-text");
             if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
-const mediaBox = document.getElementById("media-content");
+
+        const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-                // گوگل ڈرائیو لنک سے فائل آئی ڈی نکالنے کی بہتر لاجک
                 let fileId = "";
                 try {
                     if (link.includes("id=")) {
@@ -261,7 +142,6 @@ const mediaBox = document.getElementById("media-content");
                     }
                 } catch(err) { console.log("Link Error"); }
 
-                // ڈائریکٹ اسٹریم لنک بنانا
                 let finalLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
                 
                 mediaBox.innerHTML = `
@@ -271,9 +151,12 @@ const mediaBox = document.getElementById("media-content");
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
-        }      
+        }
+    } catch (e) {
+        console.log("Sync Error: ", e);
+    }
+}
 
-// ہسٹری اور دیگر فنکشنز (بغیر کسی تبدیلی کے)
 async function openHistory() {
     document.getElementById("history-modal").classList.add("show");
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
