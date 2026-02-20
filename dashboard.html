@@ -252,10 +252,14 @@ const mediaBox = document.getElementById("media-content");
             const link = data.settings.media_link;
 
             if (type === "video") {
-                mediaBox.innerHTML = `
-                    <video id="dash-video" loop playsinline controls style="width:100%; height:100%; object-fit:cover;">
-                        <source src="${link}" type="video/mp4">
-                    </video>`;
+    // یہ لائن گوگل ڈرائیو کے لنک کو ڈائریکٹ پلے لنک میں بدل دے گی
+    let directLink = link.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=download&id=');
+    
+    mediaBox.innerHTML = `
+        <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
+            <source src="${directLink}" type="video/mp4">
+        </video>`;
+}
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
