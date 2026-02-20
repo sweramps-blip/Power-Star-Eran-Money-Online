@@ -235,7 +235,7 @@ async function syncDashboard() {
         if (data.users) {
             const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
             if(dbUser) {
-                document.getElementById("u-bal").innerText = dbUser.balance;
+                document.getElementById("u-bal").innerText = parseFloat(dbUser.balance).toFixed(2);
                 document.getElementById("u-id").innerText = dbUser.user_id;
                 document.getElementById("u-name").innerText = dbUser.name;
                 localStorage.setItem("ps_user", JSON.stringify(dbUser));
