@@ -133,16 +133,17 @@ async function syncDashboard() {
             const link = data.settings.media_link;
 
             if (type === "video") {
-                let fileId = "";
-                try {
+                let finalLink = link;
+                // اگر لنک گوگل ڈرائیو کا ہے تو اسے اسٹریم لنک میں بدلنا
+                if (link.includes("drive.google.com")) {
+                    let fileId = "";
                     if (link.includes("id=")) {
                         fileId = link.split("id=")[1].split("&")[0];
                     } else if (link.includes("/d/")) {
                         fileId = link.split("/d/")[1].split("/")[0];
                     }
-                } catch(err) { console.log("Link Error"); }
-
-                let finalLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                    finalLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                }
                 
                 mediaBox.innerHTML = `
                     <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
