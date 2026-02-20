@@ -245,29 +245,33 @@ async function syncDashboard() {
             const newsMarquee = document.getElementById("news-text");
             if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
-
-        const mediaBox = document.getElementById("media-content");
+const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-                // گوگل ڈرائیو لنک کو ڈائریکٹ لنک میں بدلنا
-                let directLink = link.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=download&id=');
+                // گوگل ڈرائیو لنک سے فائل آئی ڈی نکالنے کی بہتر لاجک
+                let fileId = "";
+                try {
+                    if (link.includes("id=")) {
+                        fileId = link.split("id=")[1].split("&")[0];
+                    } else if (link.includes("/d/")) {
+                        fileId = link.split("/d/")[1].split("/")[0];
+                    }
+                } catch(err) { console.log("Link Error"); }
+
+                // ڈائریکٹ اسٹریم لنک بنانا
+                let finalLink = `https://drive.google.com/uc?export=download&id=${fileId}`;
                 
                 mediaBox.innerHTML = `
                     <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
-                        <source src="${directLink}" type="video/mp4">
+                        <source src="${finalLink}" type="video/mp4">
                     </video>`;
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
-        }
-        
-    } catch (e) {
-        console.log("Sync Error: ", e);
-    }
-}
+        }      
 
 // ہسٹری اور دیگر فنکشنز (بغیر کسی تبدیلی کے)
 async function openHistory() {
