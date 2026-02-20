@@ -253,7 +253,11 @@ async function syncDashboard() {
             const link = data.settings.media_link;
 
             if (type === "video") {
-                mediaBox.innerHTML = `<video src="${link}" autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;"></video>`;
+    mediaBox.innerHTML = `
+        <video id="dash-video" loop playsinline controls style="width:100%; height:100%; object-fit:cover;">
+            <source src="${link}" type="video/mp4">
+        </video>`;
+}
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
