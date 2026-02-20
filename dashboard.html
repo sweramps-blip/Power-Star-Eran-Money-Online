@@ -133,14 +133,22 @@ async function syncDashboard() {
             const link = data.settings.media_link;
 
             if (type === "video") {
-                let fileId = "";
-                if (link.includes("/d/")) {
-                    fileId = link.split("/d/")[1].split("/")[0];
-                } else if (link.includes("id=")) {
-                    fileId = link.split("id=")[1].split("&")[0];
+                let finalLink = link;
+                
+                // Dropbox Link Auto-Fix
+                if (link.includes("dropbox.com")) {
+                    finalLink = link.replace("dl=0", "raw=1");
+                } 
+                // Google Drive Link Auto-Fix
+                else if (link.includes("drive.google.com")) {
+                    let fileId = "";
+                    if (link.includes("/d/")) {
+                        fileId = link.split("/d/")[1].split("/")[0];
+                    } else if (link.includes("id=")) {
+                        fileId = link.split("id=")[1].split("&")[0];
+                    }
+                    finalLink = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : link;
                 }
-
-                let finalLink = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : link;
                 
                 mediaBox.innerHTML = `
                     <video autoplay muted loop playsinline 
