@@ -218,7 +218,6 @@
             </div>
         </div>
     </div>
-
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
 
@@ -246,31 +245,31 @@ async function syncDashboard() {
             const newsMarquee = document.getElementById("news-text");
             if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
         }
-const mediaBox = document.getElementById("media-content");
+
+        const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
 
             if (type === "video") {
-    // یہ لائن گوگل ڈرائیو کے لنک کو ڈائریکٹ پلے لنک میں بدل دے گی
-    let directLink = link.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=download&id=');
-    
-    mediaBox.innerHTML = `
-        <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
-            <source src="${directLink}" type="video/mp4">
-        </video>`;
-}
+                // گوگل ڈرائیو لنک کو ڈائریکٹ لنک میں بدلنا
+                let directLink = link.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=download&id=');
+                
+                mediaBox.innerHTML = `
+                    <video autoplay muted loop playsinline style="width:100%; height:100%; object-fit:cover;">
+                        <source src="${directLink}" type="video/mp4">
+                    </video>`;
             } else {
                 mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover;">`;
             }
-        } // یہ وہ بریکٹ ہے جو میڈیا کنٹینٹ کو بند کرتی ہے
+        }
         
     } catch (e) {
         console.log("Sync Error: ", e);
     }
 }
 
-// Open History Modal
+// ہسٹری اور دیگر فنکشنز (بغیر کسی تبدیلی کے)
 async function openHistory() {
     document.getElementById("history-modal").classList.add("show");
     const localUser = JSON.parse(localStorage.getItem("ps_user"));
@@ -283,42 +282,33 @@ async function openHistory() {
 
         let html = '';
         userHistory.reverse().forEach(item => {
-            // پروفیشنل نام سیٹ کرنا
             let displayTitle = item.status; 
             if(["Pending", "Approved", "Rejected"].includes(item.status)) {
                 displayTitle = "Withdrawal (" + item.status + ")";
             }
-
             html += `
                 <div class="history-item">
                     <div class="history-item-left">
                         <div class="history-type">${displayTitle}</div>
                         <div class="history-date">${new Date(item.date).toLocaleDateString()}</div>
                     </div>
-                    <div class="history-amount">Rs. ${item.amount}</div>
+                    <div class="history-amount">Rs. ${parseFloat(item.amount).toFixed(2)}</div>
                 </div>`;
         });
-        historyBody.innerHTML = html;
+        historyBody.innerHTML = html || '<p style="text-align:center; padding:20px;">No history.</p>';
     } catch (e) { historyBody.innerHTML = '<p>Error loading...</p>'; }
 }
 
-function closeHistory() {
-    document.getElementById("history-modal").classList.remove("show");
-}
+function closeHistory() { document.getElementById("history-modal").classList.remove("show"); }
 
-// Show Income
 function showIncome() {
     const user = JSON.parse(localStorage.getItem("ps_user"));
-    
     Swal.fire({
         title: '<strong>💰 Your Income</strong>',
-        html: `
-            <div style="text-align: left; padding: 10px;">
-                <p style="margin: 10px 0;"><b>Total Balance:</b> Rs. ${parseFloat(user.balance).toFixed(2) || 0}</p>
-                <p style="margin: 10px 0;"><b>User ID:</b> ${user.user_id}</p>
-                <p style="margin: 10px 0; color: #64748b; font-size: 12px;">Visit Team page to see referral earnings</p>
-            </div>
-        `,
+        html: `<div style="text-align: left; padding: 10px;">
+                <p><b>Total Balance:</b> Rs. ${parseFloat(user.balance).toFixed(2)}</p>
+                <p><b>User ID:</b> ${user.user_id}</p>
+               </div>`,
         icon: 'info',
         confirmButtonColor: '#fbbf24'
     });
@@ -329,10 +319,7 @@ function logout() {
     window.location.href = "index.html";
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    syncDashboard();
-});
+document.addEventListener('DOMContentLoaded', syncDashboard);
 </script>
-
 </body>
 </html>
