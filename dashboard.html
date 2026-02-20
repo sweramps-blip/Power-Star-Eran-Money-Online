@@ -311,7 +311,7 @@ function showIncome() {
         title: '<strong>💰 Your Income</strong>',
         html: `
             <div style="text-align: left; padding: 10px;">
-                <p style="margin: 10px 0;"><b>Total Balance:</b> Rs. ${user.balance || 0}</p>
+                <p style="margin: 10px 0;"><b>Total Balance:</b> Rs. ${parseFloat(user.balance).toFixed(2) || 0}</p>
                 <p style="margin: 10px 0;"><b>User ID:</b> ${user.user_id}</p>
                 <p style="margin: 10px 0; color: #64748b; font-size: 12px;">Visit Team page to see referral earnings</p>
             </div>
