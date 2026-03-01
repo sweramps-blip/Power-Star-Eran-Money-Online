@@ -209,8 +209,31 @@ function logout() {
     localStorage.removeItem("ps_user");
     window.location.href = "index.html";
 }
-
 document.addEventListener('DOMContentLoaded', syncDashboard);
+    function copyID() {
+    const idText = document.getElementById("u-id").innerText;
+    
+    // موبائل اور ڈیسک ٹاپ دونوں کے لیے کاپی لاجک
+    navigator.clipboard.writeText(idText).then(() => {
+        // SweetAlert کے ذریعے چھوٹا سا نوٹیفکیشن
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            background: '#1a1f35',
+            color: '#fff'
+        });
+        
+        Toast.fire({
+            icon: 'success',
+            title: 'ID Copied: ' + idText
+        });
+    }).catch(err => {
+        console.error('Copy failed', err);
+    });
+    }
 </script>
 </body>
 </html>
