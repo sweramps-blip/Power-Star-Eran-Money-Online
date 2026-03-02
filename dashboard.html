@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -135,7 +136,7 @@
     </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbziDqfhlmwfiu1ef6fUH-Tro_bSYifwZFW6H5992P8oFfS9mFwolQQpF9RA9NkLUe6-ZQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyYKUkbl5tl0mRNJGma5kQAW_CqAGr1k0wvM7xdwtTE1jCpJt0xiYGAGR9-FzGlEsc50w/exec";
 
 async function syncDashboard() {
     const localUser = JSON.parse(localStorage.getItem("psUser") || localStorage.getItem("ps_user") || "null");
@@ -194,11 +195,27 @@ async function syncDashboard() {
 
 async function openHistory() {
     document.getElementById("history-modal").classList.add("show");
-    const historyBody = document.getElementById("history-body");
-    historyBody.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;">No transaction history yet.</p>';
+    const hb = document.getElementById("history-body");
+    hb.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;"><i class="fas fa-spinner fa-spin"></i></p>';
+    const localUser = JSON.parse(localStorage.getItem("psUser") || localStorage.getItem("ps_user") || "null");
+    if (!localUser) return;
+    try {
+        const res  = await fetch(API_URL + "?type=get_history&userId=" + encodeURIComponent(localUser.user_id || ""));
+        const data = await res.json();
+        if (data.status !== "success" || !data.history || !data.history.length) {
+            hb.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;">No history yet.</p>'; return;
+        }
+        const colorMap = { "Salary":"#22c55e","Commission":"#3b82f6","Reward":"#a855f7","Bonus":"#f97316","Withdrawal":"#fbbf24","Rejected":"#ef4444","Deduction":"#ef4444" };
+        let html = "";
+        data.history.forEach(function(h) {
+            const color = colorMap[h.type] || "#94a3b8";
+            const sign  = (h.type==="Withdrawal"||h.type==="Rejected"||h.type==="Deduction") ? "- " : "+ ";
+            const date  = new Date(h.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+            html += '<div class="history-item"><div><div class="history-type">' + (h.title||h.type) + '</div><div style="font-size:11px;color:#64748b;margin-top:3px;">' + date + '</div></div><div style="text-align:right"><div class="history-amount" style="color:' + color + '">' + sign + 'Rs. ' + parseFloat(h.amount).toFixed(2) + '</div>' + (h.status ? '<div style="font-size:11px;font-weight:700;color:' + color + '">' + h.status + '</div>' : '') + '</div></div>';
+        });
+        hb.innerHTML = html;
+    } catch(e) { hb.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">Load failed.</p>'; }
 }
-
-// ✅ آپ کا پرانا closeHistory — بالکل نہیں بدلا
 function closeHistory() { document.getElementById("history-modal").classList.remove("show"); }
 
 // ✅ آپ کا پرانا showIncome — بالکل نہیں بدلا
