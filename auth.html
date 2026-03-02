@@ -8,7 +8,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* آپ کا اصل ڈیزائن - 100% وہی */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: 'Outfit', sans-serif; background: #0a0e1a; color: #fff; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: translateX(-50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
@@ -55,7 +54,6 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
     <h1>Power Star</h1>
     <p>Secure Authentication</p>
   </div>
-
   <div class="card">
     <div class="tab-bar">
       <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Login</button>
@@ -84,108 +82,156 @@ body::before { content: ''; position: fixed; top: -40%; left: 50%; transform: tr
     <div class="device-row">ID: <span class="did-value" id="did-text">######</span></div>
   </div>
 </div>
+
 <script>
-const API = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
-const KEY = "POWER_STAR_786_SECURE";
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbyvLgorsTCdyBp8gO-kf155uDp1HIwS5u2-eJEbfc8yT-jyzvsie3lxyHV-J7C0YlqJ-g/exec";
 
-// ✅ 1. AUTOMATIC REFERRAL CAPTURE (New Logic added without disturbing old)
-window.addEventListener('load', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const refFromUrl = urlParams.get('ref');
-    if (refFromUrl) {
-        const refField = document.getElementById("r-ref");
-        if (refField) {
-            refField.value = refFromUrl;
-            refField.readOnly = true; // لاک کر دیا تاکہ غلطی سے مٹ نہ جائے
-            refField.style.background = "rgba(251, 191, 36, 0.1)"; // ہلکا سا ہائی لائٹ
-        }
+  window.onload = () => {
+    // ✅ اگر پہلے سے لاگ ان ہے تو سیدھا dashboard بھیجو
+    if (localStorage.getItem("psLoggedIn") === "true" && localStorage.getItem("psID")) {
+      window.location.replace("dashboard.html");
+      return;
     }
-});
 
-// 1. Device ID Logic (UNTOUCHED)
-function getUniqueDeviceId() {
-    let id = localStorage.getItem('ps_unique_device_id');
+    const did = getDeviceId();
+    document.getElementById('did-text').innerText = did.substring(0, 10) + "...";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      document.getElementById('r-ref').value = refCode;
+      switchTab('register');
+    }
+  };
+
+  function getDeviceId() {
+    let id = localStorage.getItem('ps_device_token');
     if (!id) {
-        id = 'PS-' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36).slice(-4);
-        localStorage.setItem('ps_unique_device_id', id);
+      id = 'dev-' + Math.random().toString(36).substr(2, 9) + Date.now();
+      localStorage.setItem('ps_device_token', id);
     }
     return id;
-}
-const current_device_id = getUniqueDeviceId();
-document.getElementById("did-text").innerText = current_device_id.slice(0, 8).toUpperCase();
+  }
 
-// 2. UI Helpers (UNTOUCHED)
-function switchTab(t){
-  document.getElementById("tab-login").classList.toggle("active",t==='login');
-  document.getElementById("tab-register").classList.toggle("active",t==='register');
-  document.getElementById("panel-login").classList.toggle("active",t==='login');
-  document.getElementById("panel-register").classList.toggle("active",t==='register');
-}
-function toggleEye(id, btn) {
-  const el = document.getElementById(id);
-  el.type = el.type === "password" ? "text" : "password";
-}
-function checkStrength() {
-  const p = document.getElementById("r-pass").value;
-  const segs = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
-  const label = document.getElementById("strength-label");
-  segs.forEach(s => s.className = "strength-seg");
-  if (!p) { label.innerText = ""; return; }
-  if (p.length < 6) { segs[0].classList.add("on-weak"); label.innerText = "Weak"; label.style.color = "#ef4444"; }
-  else if (p.length < 10) { segs[0].classList.add("on-medium"); segs[1].classList.add("on-medium"); label.innerText = "Medium"; label.style.color = "#f97316"; }
-  else { segs.forEach(s => s.classList.add("on-strong")); label.innerText = "Strong"; label.style.color = "#22c55e"; }
-}
+  function switchTab(type) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + type).classList.add('active');
+    document.getElementById('panel-' + type).classList.add('active');
+  }
 
-// 3. LOGIN (UNTOUCHED)
-async function doLogin() {
-    const num = document.getElementById('l-num').value.trim();
-    const pass = document.getElementById('l-pass').value.trim();
-    if(!num || !pass) return Swal.fire("Error", "Fill all fields", "error");
+  function toggleEye(id, btn) {
+    const inp = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if (inp.type === "password") { inp.type = "text"; icon.className = "fas fa-eye-slash"; }
+    else { inp.type = "password"; icon.className = "fas fa-eye"; }
+  }
 
-    Swal.fire({ title: 'Logging in...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+  function checkStrength() {
+    const val  = document.getElementById("r-pass").value;
+    const segs = [document.getElementById("seg1"), document.getElementById("seg2"), document.getElementById("seg3")];
+    const lbl  = document.getElementById("strength-label");
+    segs.forEach(s => s.className = "strength-seg");
+    if (val.length === 0) { lbl.textContent = ""; return; }
+    if (val.length < 5) {
+      segs[0].classList.add("on-weak");
+      lbl.textContent = "Weak"; lbl.style.color = "#ef4444";
+    } else if (val.length < 8) {
+      segs[0].classList.add("on-medium"); segs[1].classList.add("on-medium");
+      lbl.textContent = "Medium"; lbl.style.color = "#f97316";
+    } else {
+      segs.forEach(s => s.classList.add("on-strong"));
+      lbl.textContent = "Strong"; lbl.style.color = "#22c55e";
+    }
+  }
+
+  // ════════════════════════════════════
+  //  LOGIN — مکمل ٹھیک شدہ
+  // ════════════════════════════════════
+  async function doLogin() {
+    const num      = document.getElementById("l-num").value.trim();
+    const pass     = document.getElementById("l-pass").value.trim();
+    const deviceId = getDeviceId();
+
+    if (!num || !pass) return Swal.fire("Error", "Phone اور Password ضروری ہیں", "error");
+
+    Swal.fire({ title: 'Verifying...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
     try {
-        const res = await fetch(API);
-        const data = await res.json();
-        const users = data.users || [];
-        const user = users.find(u => String(u.number) === num && String(u.password) === pass);
+      const res = await fetch(`${GAS_URL}?type=login&num=${encodeURIComponent(num)}&pass=${encodeURIComponent(pass)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const out = await res.json();
 
-        if(!user) return Swal.fire("Error", "Ghalt Number ya Password!", "error");
+      if (out.status === "success") {
+        // ✅ تینوں keys save کریں
+        localStorage.setItem("psLoggedIn", "true");
+        localStorage.setItem("psID",       out.user.user_id);
+        localStorage.setItem("psUser",     JSON.stringify(out.user));
+        localStorage.setItem("ps_user",    JSON.stringify(out.user));
 
-        localStorage.setItem("ps_user", JSON.stringify(user));
-        Swal.fire("Success", "Welcome Back!", "success").then(() => { window.location.href = "dashboard.html"; });
-    } catch(e) { Swal.fire("Error", "Connection Failed", "error"); }
-}
+        Swal.fire({
+          title: "Login Successful!",
+          text : "Welcome " + (out.user.name || "") + "!",
+          icon : "success",
+          timer: 1500,
+          showConfirmButton: false
+        });
 
-// 4. REGISTER (UNTOUCHED LOGIC - JUST ADDED SYNC)
-async function doRegister() {
-  const name = document.getElementById("r-name").value.trim();
-  const num = document.getElementById("r-num").value.trim();
-  const pass = document.getElementById("r-pass").value.trim();
-  const ref = document.getElementById("r-ref").value.trim() || "DIRECT";
-  const terms = document.getElementById("terms-chk").checked;
+        // ✅ 1.6 سیکنڈ بعد dashboard — replace() تاکہ back button index پر نہ لے جائے
+        setTimeout(() => { window.location.replace("dashboard.html"); }, 1600);
 
-  if(!name || !num || !pass) return Swal.fire("Warning", "Saray fields bharain", "warning");
-  if(!terms) return Swal.fire("Terms", "Accept T&C", "info");
+      } else {
+        Swal.fire("Access Denied", out.message || "Login failed", "error");
+      }
+    } catch (e) {
+      Swal.fire("Server Error", "Connection failed. Try again.", "error");
+    }
+  }
 
-  Swal.fire({title: 'Checking...', didOpen: () => Swal.showLoading()});
+  // ════════════════════════════════════
+  //  REGISTER
+  // ════════════════════════════════════
+  async function doRegister() {
+    const name     = document.getElementById("r-name").value.trim();
+    const num      = document.getElementById("r-num").value.trim();
+    const pass     = document.getElementById("r-pass").value.trim();
+    const ref      = document.getElementById("r-ref").value.trim() || "DIRECT";
+    const deviceId = getDeviceId();
 
-  try {
-    const res = await fetch(API);
-    const data = await res.json();
-    const users = data.users || [];
+    if (!name || !num || !pass) return Swal.fire("Error", "تمام fields بھریں", "error");
+    if (!document.getElementById("terms-chk").checked)
+      return Swal.fire("Error", "Terms & Conditions agree کریں", "error");
 
-    if(users.some(u => String(u.number) === num)) return Swal.fire("Error", "Number already registered", "error");
-    if(users.some(u => u.device_id === current_device_id)) return Swal.fire("Error", "1 Mobile = 1 Account Only!", "error");
+    Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
-    const auto_id = "PS" + String(users.length + 1).padStart(4, '0');
-    const payload = { key: KEY, action: "register", name: name, number: num, password: pass, referral: ref, device_id: current_device_id, date: new Date().toLocaleDateString(), user_id: auto_id };
+    try {
+      const res = await fetch(GAS_URL, {
+        method : "POST",
+        headers: { "Content-Type": "application/json" },
+        body   : JSON.stringify({ type: "register", name, number: num, password: pass, referral: ref, device_id: deviceId })
+      });
+      const out = await res.json();
 
-    await fetch(API, { method: "POST", body: JSON.stringify(payload) });
-    Swal.fire("Success", "Account Created!", "success").then(() => { switchTab('login'); });
-  } catch(e) { Swal.fire("Error", "Failed", "error"); }
-}
+      if (out.status === "success") {
+        localStorage.setItem("psLoggedIn", "true");
+        localStorage.setItem("psID",       out.user_id);
+        localStorage.setItem("psUser",     JSON.stringify({ user_id: out.user_id, name, number: num }));
+
+        Swal.fire({
+          title: "Registration Successful!",
+          text : "Your ID: " + out.user_id,
+          icon : "success",
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        setTimeout(() => { window.location.replace("dashboard.html"); }, 2000);
+      } else {
+        Swal.fire("Failed", out.message || "Registration failed", "error");
+      }
+    } catch (e) {
+      Swal.fire("Network Error", "Unable to connect. Try again.", "error");
+    }
+  }
 </script>
-
 </body>
 </html>
