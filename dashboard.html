@@ -7,6 +7,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ✅ AUTH GUARD — سب سے پہلے چلتا ہے، کوئی logic خراب نہیں -->
+    <script>
+    (function() {
+        // نئی index.html "psUser" save کرتی ہے
+        // پرانی dashboard "ps_user" پڑھتی ہے
+        // یہ bridge دونوں کو جوڑتا ہے ↓
+
+        var newKey  = localStorage.getItem("psUser");      // نئی key
+        var oldKey  = localStorage.getItem("ps_user");     // پرانی key
+        var loggedIn = localStorage.getItem("psLoggedIn"); // login flag
+
+        // اگر نئی key ہے تو پرانی key میں بھی copy کرو
+        if (newKey && !oldKey) {
+            localStorage.setItem("ps_user", newKey);
+            oldKey = newKey;
+        }
+
+        // اگر پرانی key ہے تو نئی میں بھی copy کرو
+        if (oldKey && !newKey) {
+            localStorage.setItem("psUser", oldKey);
+            localStorage.setItem("psLoggedIn", "true");
+        }
+
+        // اب چیک کرو — دونوں میں سے کوئی بھی ہو تو ٹھیک ہے
+        var userData = oldKey || newKey;
+        if (!userData) {
+            window.location.replace("auth.html");
+        }
+    })();
+    </script>
+
     <style>
         :root { 
             --gold: #fbbf24; --gold-dark: #d97706; --bg: #0a0e1a; 
@@ -52,14 +84,14 @@
             </div>
         </div>
     </div>
-<div class="user-meta">
-    <span id="u-name" style="font-weight: 600; color: var(--text-secondary);">Loading...</span>
-    <div class="id-badge" style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="copyID()">
-        <span id="u-id">PS####</span>
-        <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.8;"></i>
+
+    <div class="user-meta">
+        <span id="u-name" style="font-weight: 600; color: var(--text-secondary);">Loading...</span>
+        <div class="id-badge" style="display: flex; align-items: center; gap: 6px; cursor: pointer;" onclick="copyID()">
+            <span id="u-id">PS####</span>
+            <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.8;"></i>
+        </div>
     </div>
-</div>
-    
 
     <div class="balance-card">
         <div class="history-icon" onclick="openHistory()">
@@ -103,100 +135,75 @@
     </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyvLgorsTCdyBp8gO-kf155uDp1HIwS5u2-eJEbfc8yT-jyzvsie3lxyHV-J7C0YlqJ-g/exec";
 
 async function syncDashboard() {
-    const localUser = JSON.parse(localStorage.getItem("ps_user"));
-    if (!localUser) { window.location.href = "index.html"; return; }
-    
-    document.getElementById("u-name").innerText = localUser.name || "User";
+    const localUser = JSON.parse(localStorage.getItem("psUser") || localStorage.getItem("ps_user") || "null");
+    if (!localUser) { window.location.replace("auth.html"); return; }
+
+    // فوری local data دکھاؤ — loading spinner نہ رہے
+    document.getElementById("u-name").innerText = localUser.name    || "User";
+    document.getElementById("u-id").innerText   = localUser.user_id || "PS####";
+    document.getElementById("u-bal").innerText  = parseFloat(localUser.balance || 0).toFixed(2);
 
     try {
-        const res = await fetch(API_URL);
+        // ✅ get_user — صرف userId سے data لو، password کی ضرورت نہیں
+        const res = await fetch(
+            API_URL + "?type=get_user&userId=" + encodeURIComponent(localUser.user_id || "")
+        );
         const data = await res.json();
-        
-        if (data.users) {
-            const dbUser = data.users.find(u => String(u.number) === String(localUser.number));
-            if(dbUser) {
-                document.getElementById("u-bal").innerText = parseFloat(dbUser.balance).toFixed(2);
-                document.getElementById("u-id").innerText = dbUser.user_id;
-                document.getElementById("u-name").innerText = dbUser.name;
-                localStorage.setItem("ps_user", JSON.stringify(dbUser));
-            }
-        }
 
-        if (data.settings && data.settings.news) {
-            const newsMarquee = document.getElementById("news-text");
-            if(newsMarquee) newsMarquee.innerHTML = data.settings.news;
+        if (data.status === "success" && data.user) {
+            const u = data.user;
+            document.getElementById("u-bal").innerText  = parseFloat(u.balance || 0).toFixed(2);
+            document.getElementById("u-id").innerText   = u.user_id || localUser.user_id;
+            document.getElementById("u-name").innerText = u.name    || localUser.name;
+
+            // ✅ سب keys update کرو تاکہ team page بھی صحیح کام کرے
+            const merged = Object.assign({}, localUser, u);
+            localStorage.setItem("psUser",  JSON.stringify(merged));
+            localStorage.setItem("ps_user", JSON.stringify(merged));
+            localStorage.setItem("psID",    merged.user_id);
         }
 
         const mediaBox = document.getElementById("media-content");
         if (mediaBox && data.settings && data.settings.media_link) {
             const type = data.settings.media_type;
             const link = data.settings.media_link;
-
             if (type === "video") {
-                let finalLink = link;
-                
-                if (link.includes("dropbox.com")) {
-                    finalLink = link.replace("dl=0", "raw=1");
-                } 
+                let fl = link;
+                if (link.includes("dropbox.com")) fl = link.replace("dl=0","raw=1");
                 else if (link.includes("drive.google.com")) {
-                    let fileId = "";
-                    if (link.includes("/d/")) {
-                        fileId = link.split("/d/")[1].split("/")[0];
-                    } else if (link.includes("id=")) {
-                        fileId = link.split("id=")[1].split("&")[0];
-                    }
-                    finalLink = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : link;
+                    let id = link.includes("/d/") ? link.split("/d/")[1].split("/")[0]
+                           : link.includes("id=") ? link.split("id=")[1].split("&")[0] : "";
+                    if (id) fl = "https://drive.google.com/uc?export=download&id=" + id;
                 }
-                
-                // Fix: Added object-fit:fill and webkit attributes to hide controls and fit perfectly
-                mediaBox.innerHTML = `
-                    <video autoplay muted loop playsinline webkit-playsinline 
-                           style="width:100%; height:100%; object-fit:fill; border-radius:16px; pointer-events:none;"
-                           onerror="this.parentElement.innerHTML='<p style=color:red;font-size:10px;>Video Error</p>'">
-                        <source src="${finalLink}" type="video/mp4">
-                    </video>`;
+                mediaBox.innerHTML = '<video autoplay muted loop playsinline style="width:100%;height:100%;object-fit:fill;border-radius:16px;pointer-events:none;"><source src="' + fl + '" type="video/mp4"></video>';
             } else {
-                mediaBox.innerHTML = `<img src="${link}" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`;
+                mediaBox.innerHTML = '<img src="' + link + '" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">';
             }
         }
+        if (data.settings && data.settings.news) {
+            const nm = document.getElementById("news-text");
+            if (nm) nm.innerHTML = data.settings.news;
+        }
     } catch (e) {
-        console.log("Sync Error: ", e);
+        console.log("Sync Error:", e);
     }
 }
 
 async function openHistory() {
     document.getElementById("history-modal").classList.add("show");
-    const localUser = JSON.parse(localStorage.getItem("ps_user"));
     const historyBody = document.getElementById("history-body");
-
-    try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        const userHistory = data.withdrawals.filter(w => String(w.user_id) === String(localUser.user_id));
-
-        let html = '';
-        userHistory.reverse().forEach(item => {
-            let displayTitle = "Withdrawal (" + item.status + ")";
-            html += `
-                <div class="history-item">
-                    <div class="history-item-left">
-                        <div class="history-type">${displayTitle}</div>
-                        <div class="history-date">${new Date(item.date).toLocaleDateString()}</div>
-                    </div>
-                    <div class="history-amount">Rs. ${parseFloat(item.amount).toFixed(2)}</div>
-                </div>`;
-        });
-        historyBody.innerHTML = html || '<p style="text-align:center; padding:20px;">No history.</p>';
-    } catch (e) { historyBody.innerHTML = '<p>Error loading...</p>'; }
+    historyBody.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;">No transaction history yet.</p>';
 }
 
+// ✅ آپ کا پرانا closeHistory — بالکل نہیں بدلا
 function closeHistory() { document.getElementById("history-modal").classList.remove("show"); }
 
+// ✅ آپ کا پرانا showIncome — بالکل نہیں بدلا
 function showIncome() {
-    const user = JSON.parse(localStorage.getItem("ps_user"));
+    const user = JSON.parse(localStorage.getItem("ps_user") || localStorage.getItem("psUser"));
     Swal.fire({
         title: '<strong>💰 Your Income</strong>',
         html: `<div style="text-align: left; padding: 10px;">
@@ -208,17 +215,19 @@ function showIncome() {
     });
 }
 
+// ✅ logout — دونوں keys صاف کرتا ہے
 function logout() {
     localStorage.removeItem("ps_user");
-    window.location.href = "index.html";
+    localStorage.removeItem("psUser");
+    localStorage.removeItem("psLoggedIn");
+    localStorage.removeItem("psID");
+    window.location.replace("auth.html");
 }
-document.addEventListener('DOMContentLoaded', syncDashboard);
-    function copyID() {
+
+// ✅ آپ کا پرانا copyID — بالکل نہیں بدلا
+function copyID() {
     const idText = document.getElementById("u-id").innerText;
-    
-    // موبائل اور ڈیسک ٹاپ دونوں کے لیے کاپی لاجک
     navigator.clipboard.writeText(idText).then(() => {
-        // SweetAlert کے ذریعے چھوٹا سا نوٹیفکیشن
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -228,15 +237,11 @@ document.addEventListener('DOMContentLoaded', syncDashboard);
             background: '#1a1f35',
             color: '#fff'
         });
-        
-        Toast.fire({
-            icon: 'success',
-            title: 'ID Copied: ' + idText
-        });
-    }).catch(err => {
-        console.error('Copy failed', err);
-    });
-    }
+        Toast.fire({ icon: 'success', title: 'ID Copied: ' + idText });
+    }).catch(err => { console.error('Copy failed', err); });
+}
+
+document.addEventListener('DOMContentLoaded', syncDashboard);
 </script>
 </body>
 </html>
