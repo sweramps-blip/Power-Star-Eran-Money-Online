@@ -225,7 +225,7 @@ body::before {
 <div class="bottom-pad"></div>
 
 <script>
-  const GAS_URL  = "https://script.google.com/macros/s/AKfycbziDqfhlmwfiu1ef6fUH-Tro_bSYifwZFW6H5992P8oFfS9mFwolQQpF9RA9NkLUe6-ZQ/exec";
+  const GAS_URL  = "https://script.google.com/macros/s/AKfycbyYKUkbl5tl0mRNJGma5kQAW_CqAGr1k0wvM7xdwtTE1jCpJt0xiYGAGR9-FzGlEsc50w/exec";
   const userId   = window.CU.user_id || "";
   const pageBase = window.location.href.replace(/[^/]*$/, "");
   const refLink  = pageBase + "auth.html?ref=" + userId;
@@ -272,7 +272,7 @@ body::before {
       }
 
       const team     = data.team || [];
-      const active   = team.filter(m => (m.status || "active") === "active").length;
+      const active   = team.filter(m => !m.status || m.status === "" || m.status.toLowerCase() === "active").length;
       const inactive = team.length - active;
 
       document.getElementById("totalCount").textContent    = team.length;
@@ -287,7 +287,7 @@ body::before {
       const list = document.getElementById("memberList");
       team.forEach((m, i) => {
         const initial  = (m.name || "?").charAt(0).toUpperCase();
-        const isActive = (m.status || "active") === "active";
+        const isActive = !m.status || m.status === "" || m.status.toLowerCase() === "active";
         const joined   = m.joined_at ? _fmtDate(m.joined_at) : "—";
 
         const card = document.createElement("div");
