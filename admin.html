@@ -1,186 +1,487 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Power Star | Master Admin Panel</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --gold: #fbbf24; --bg: #0a0e1a; --card: #161b2e; --border: #2d3548; --text: #94a3b8; }
-        body { background: var(--bg); color: white; font-family: 'Outfit', sans-serif; margin: 0; padding: 15px; display: none; } /* Hide body until login */
-        .admin-container { max-width: 600px; margin: auto; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 20px; margin-bottom: 20px; border-top: 3px solid var(--gold); position: relative; }
-        h3 { color: var(--gold); margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; gap: 10px; }
-        label { font-size: 11px; color: var(--text); text-transform: uppercase; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; background: #0a0e1a; border: 1px solid var(--border); color: white; border-radius: 8px; margin: 5px 0 15px 0; box-sizing: border-box; outline: none; }
-        input:focus { border-color: var(--gold); }
-        .btn { width: 100%; padding: 15px; background: var(--gold); border: none; border-radius: 8px; font-weight: 800; cursor: pointer; color: #000; transition: 0.3s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .wdr-item { background: #0a0e1a; padding: 12px; border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--gold); font-size: 13px; }
-        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .status-pending { background: #f97316; color: white; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Power Star | Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{--bg:#0a0e1a;--card:#131829;--card2:#0f1423;--border:#1e2a45;--gold:#fbbf24;--gold2:#f59e0b;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;--purple:#a855f7;--sub:#64748b;--dim:#3d4f6e;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--bg);color:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-40%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(251,191,36,0.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-box{width:100%;max-width:360px;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:32px 24px;}
+.login-logo{text-align:center;margin-bottom:28px;}
+.login-logo .icon{width:64px;height:64px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;color:#000;margin-bottom:14px;}
+.login-logo h2{font-size:20px;font-weight:800;letter-spacing:1px;}
+.login-logo p{font-size:12px;color:var(--sub);margin-top:4px;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(10,14,26,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:14px 18px;gap:12px;}
+.topbar-title{flex:1;font-size:18px;font-weight:800;}
+.topbar-title span{color:var(--gold);}
+.logout-btn{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red);padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;}
+
+/* TABS */
+.tab-bar{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:14px 18px;font-size:12px;font-weight:700;color:var(--sub);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:0.2s;white-space:nowrap;}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* PANELS */
+.panel{display:none;padding:16px;}
+.panel.active{display:block;}
+
+/* CARDS */
+.sec-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:16px;}
+.sec-card h3{font-size:14px;font-weight:700;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* FORM */
+label{display:block;font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px;}
+input,select,textarea{width:100%;padding:12px 14px;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:0.2s;margin-bottom:14px;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);}
+select option{background:#131829;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:0.2s;margin-bottom:0;}
+.btn:active{transform:scale(0.97);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;}
+.btn-green{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.4);color:var(--green);}
+.btn-red{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:var(--red);}
+.btn-blue{background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.4);color:var(--blue);}
+
+/* USER RESULT */
+.user-result{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:12px;display:none;}
+.user-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.user-row:last-child{border:none;}
+.user-row .lbl{color:var(--sub);}
+.user-row .val{font-weight:700;text-align:right;max-width:55%;word-break:break-all;}
+
+/* WITHDRAWAL ITEMS */
+.wd-item{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px;animation:fadeUp 0.3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.wd-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.wd-name{font-size:15px;font-weight:700;}
+.wd-id{font-size:11px;color:var(--sub);margin-top:2px;}
+.wd-amount{font-size:20px;font-weight:800;color:var(--gold);text-align:right;}
+.wd-net{font-size:11px;color:var(--green);text-align:right;margin-top:2px;}
+.wd-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--sub);margin-bottom:12px;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;}
+.wd-meta div b{color:#fff;display:block;font-size:13px;margin-top:2px;}
+.wd-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.badge{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.b-pending{background:rgba(251,191,36,0.15);color:var(--gold);}
+.b-approved{background:rgba(34,197,94,0.15);color:var(--green);}
+.b-rejected{background:rgba(239,68,68,0.15);color:var(--red);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;text-align:center;}
+.stat-num{font-size:26px;font-weight:800;color:var(--gold);}
+.stat-lbl{font-size:11px;color:var(--sub);margin-top:3px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 20px;color:var(--sub);}
+.empty i{font-size:40px;margin-bottom:12px;display:block;opacity:0.4;}
+.bottom-pad{height:40px;}
+</style>
 </head>
 <body>
 
-<div class="admin-container">
-    <h2 style="text-align: center; color: var(--gold); letter-spacing: 2px;">POWER STAR <span style="color:white">ADMIN</span></h2>
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon"><i class="fas fa-shield-halved"></i></div>
+      <h2>ADMIN PANEL</h2>
+      <p>Power Star — Secure Access</p>
+    </div>
+    <label>Admin Password</label>
+    <input type="password" id="adminPass" placeholder="Password enter karen" onkeydown="if(event.key==='Enter')doAdminLogin()">
+    <button class="btn btn-gold" onclick="doAdminLogin()" style="margin-top:4px;"><i class="fas fa-lock-open"></i> Login</button>
+  </div>
+</div>
 
-    <div class="card">
-        <h3><i class="fas fa-coins"></i> Fund Disbursement</h3>
-        <label>User ID</label>
-        <input type="text" id="credit-uid" placeholder="e.g. PS0001">
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-                <label>Amount (PKR)</label>
-                <input type="number" id="credit-amt" placeholder="0.00">
-            </div>
-            <div>
-                <label>Type (History Text)</label>
-                <select id="credit-type">
-                    <option value="Salary">Salary 💼</option>
-                    <option value="Reward">Reward 🎁</option>
-                    <option value="Prize">Prize 🏆</option>
-                    <option value="Coins">Coins 💰</option>
-                </select>
-            </div>
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+  <div class="topbar">
+    <div class="topbar-title">⚡ <span>ADMIN</span> PANEL</div>
+    <button class="logout-btn" onclick="doLogout()"><i class="fas fa-right-from-bracket"></i> Logout</button>
+  </div>
+
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" onclick="switchTab('withdrawals',this)"><i class="fas fa-money-bill-transfer"></i> Withdrawals</button>
+    <button class="tab-btn" onclick="switchTab('credit',this)"><i class="fas fa-coins"></i> Fund</button>
+    <button class="tab-btn" onclick="switchTab('user',this)"><i class="fas fa-user-gear"></i> User</button>
+    <button class="tab-btn" onclick="switchTab('settings',this)"><i class="fas fa-sliders"></i> Settings</button>
+    <button class="tab-btn" onclick="switchTab('stats',this)"><i class="fas fa-chart-bar"></i> Stats</button>
+  </div>
+
+  <!-- TAB: WITHDRAWALS -->
+  <div class="panel active" id="tab-withdrawals">
+    <div class="sec-card">
+      <h3><i class="fas fa-clock"></i> Pending Withdrawals</h3>
+      <button class="btn btn-blue" onclick="loadWithdrawals('Pending')" style="margin-bottom:0;"><i class="fas fa-rotate-right"></i> Load Pending</button>
+    </div>
+    <div id="wd-list"><div class="empty"><i class="fas fa-inbox"></i>Button dabain to load ho</div></div>
+
+    <div class="sec-card" style="margin-top:4px;">
+      <h3><i class="fas fa-history"></i> History by Status</h3>
+      <div class="grid2">
+        <button class="btn btn-green" onclick="loadWithdrawals('Approved')">✅ Approved</button>
+        <button class="btn btn-red" onclick="loadWithdrawals('Rejected')">❌ Rejected</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: FUND -->
+  <div class="panel" id="tab-credit">
+    <div class="sec-card">
+      <h3><i class="fas fa-coins"></i> Fund Disbursement</h3>
+      <label>User ID</label>
+      <input type="text" id="c-uid" placeholder="PS0001">
+      <div class="grid2">
+        <div><label>Amount (Rs.)</label><input type="number" id="c-amt" placeholder="0"></div>
+        <div><label>Type</label>
+          <select id="c-type">
+            <option value="Salary">💼 Salary</option>
+            <option value="Commission">💸 Commission</option>
+            <option value="Reward">🎁 Reward</option>
+            <option value="Bonus">🏆 Bonus</option>
+            <option value="Prize">🥇 Prize</option>
+          </select>
         </div>
-        <button class="btn" onclick="sendFunds()">Credit Wallet & History</button>
+      </div>
+      <label>Note (optional)</label>
+      <input type="text" id="c-note" placeholder="e.g. March Salary">
+      <button class="btn btn-gold" onclick="sendFunds()"><i class="fas fa-paper-plane"></i> Send Funds</button>
     </div>
+    <div class="sec-card">
+      <h3><i class="fas fa-minus-circle"></i> Deduct Balance</h3>
+      <label>User ID</label>
+      <input type="text" id="d-uid" placeholder="PS0001">
+      <div class="grid2">
+        <div><label>Amount (Rs.)</label><input type="number" id="d-amt" placeholder="0"></div>
+        <div><label>Reason</label><input type="text" id="d-reason" placeholder="Reason"></div>
+      </div>
+      <button class="btn btn-red" onclick="deductFunds()"><i class="fas fa-minus"></i> Deduct Balance</button>
+    </div>
+  </div>
 
-    <div class="card">
-        <h3><i class="fas fa-search"></i> Search Team Member</h3>
-        <div style="display: flex; gap: 8px;">
-            <input type="text" id="search-id" placeholder="User ID..." style="margin:0">
-            <button onclick="findUser()" style="background:white; color:black; border:none; border-radius:8px; padding:0 15px; font-weight:bold; cursor:pointer;">FIND</button>
-        </div>
-        <div id="search-result" style="margin-top:15px; display:none; background:#0a0e1a; padding:10px; border-radius:8px; font-size:13px; line-height:1.6;"></div>
+  <!-- TAB: USER -->
+  <div class="panel" id="tab-user">
+    <div class="sec-card">
+      <h3><i class="fas fa-search"></i> Find User</h3>
+      <label>User ID</label>
+      <input type="text" id="s-uid" placeholder="PS0001">
+      <button class="btn btn-gold" onclick="findUser()"><i class="fas fa-search"></i> Search</button>
+      <div class="user-result" id="user-result"></div>
     </div>
+    <div class="sec-card">
+      <h3><i class="fas fa-unlock"></i> Device Unlock</h3>
+      <label>User ID</label>
+      <input type="text" id="ul-uid" placeholder="PS0001">
+      <button class="btn btn-blue" onclick="unlockUser()"><i class="fas fa-mobile-screen-button"></i> Unlock Device</button>
+    </div>
+    <div class="sec-card">
+      <h3><i class="fas fa-ban"></i> Block / Unblock</h3>
+      <label>User ID</label>
+      <input type="text" id="bl-uid" placeholder="PS0001">
+      <div class="grid2" style="margin-top:4px;">
+        <button class="btn btn-red" onclick="setStatus('blocked')"><i class="fas fa-ban"></i> Block</button>
+        <button class="btn btn-green" onclick="setStatus('active')"><i class="fas fa-check-circle"></i> Unblock</button>
+      </div>
+    </div>
+    <div class="sec-card">
+      <h3><i class="fas fa-key"></i> Reset Password</h3>
+      <div class="grid2">
+        <div><label>User ID</label><input type="text" id="rp-uid" placeholder="PS0001"></div>
+        <div><label>New Password</label><input type="text" id="rp-pass" placeholder="New pass"></div>
+      </div>
+      <button class="btn btn-gold" onclick="resetPassword()"><i class="fas fa-key"></i> Reset Password</button>
+    </div>
+  </div>
 
-    <div class="card">
-        <h3><i class="fas fa-receipt"></i> Pending Withdrawals</h3>
-        <div id="wdr-list"><p style="text-align:center; color:gray;">Checking requests...</p></div>
+  <!-- TAB: SETTINGS -->
+  <div class="panel" id="tab-settings">
+    <div class="sec-card">
+      <h3><i class="fas fa-newspaper"></i> News Ticker</h3>
+      <label>News Text</label>
+      <textarea id="news-text" rows="3" placeholder="Dashboard pe dikhne wali news..."></textarea>
+      <button class="btn btn-gold" onclick="updateSettings('news')"><i class="fas fa-save"></i> Save News</button>
     </div>
+    <div class="sec-card">
+      <h3><i class="fas fa-photo-video"></i> Media</h3>
+      <label>Type</label>
+      <select id="m-type"><option value="image">🖼️ Image</option><option value="video">🎥 Video</option></select>
+      <label>URL (Google Drive / Direct)</label>
+      <input type="text" id="m-link" placeholder="https://...">
+      <button class="btn btn-gold" onclick="updateSettings('media')"><i class="fas fa-upload"></i> Update Media</button>
+    </div>
+  </div>
 
-    <div class="card">
-        <h3><i class="fas fa-tv"></i> Dashboard Management</h3>
-        <label>Scrolling News Text</label>
-        <textarea id="dash-news" placeholder="Enter latest updates..."></textarea>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div>
-                <label>Media Type</label>
-                <select id="media-type">
-                    <option value="image">Image URL</option>
-                    <option value="video">YouTube ID</option>
-                </select>
-            </div>
-            <div>
-                <label>Link / ID</label>
-                <input type="text" id="media-val" placeholder="Paste here">
-            </div>
-        </div>
-        <button class="btn" style="background:#fff" onclick="updateDashboard()">Update Dashboard Content</button>
+  <!-- TAB: STATS -->
+  <div class="panel" id="tab-stats">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="st-total">—</div><div class="stat-lbl">Total Users</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-active" style="color:var(--green)">—</div><div class="stat-lbl">Active</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-pending" style="color:var(--gold)">—</div><div class="stat-lbl">Pending WD</div></div>
+      <div class="stat-box"><div class="stat-num" id="st-approved" style="color:var(--green)">—</div><div class="stat-lbl">Approved WD</div></div>
     </div>
+    <button class="btn btn-gold" onclick="loadStats()"><i class="fas fa-rotate-right"></i> Load Stats</button>
+  </div>
+
+  <div class="bottom-pad"></div>
 </div>
 
 <script>
-// --- CONFIGURATION ---
-const API = "https://script.google.com/macros/s/AKfycbzX--o3MoKrZ3ZWNsVoWzfiadhtk3jtrK4abVes_yRAkkZTFWdjz44JoUYB-qpWNT0X/exec";
-const MASTER_KEY = "POWER_STAR_786_SECURE";
-const ADMIN_PASS = "PS_ADMIN_2026"; // 🔑 GitHub protection password
+const GAS        = "https://script.google.com/macros/s/AKfycbziDqfhlmwfiu1ef6fUH-Tro_bSYifwZFW6H5992P8oFfS9mFwolQQpF9RA9NkLUe6-ZQ/exec";
+const MASTER_KEY = "POWER_STAR_786";
 
-// --- SECURITY LOGIN ---
-(function authenticate() {
-    const val = prompt("Enter Master Admin Password:");
-    if(val === ADMIN_PASS) {
-        document.body.style.display = "block";
-        loadPendingWdr();
-    } else {
-        alert("Access Denied!");
-        window.location.href = "about:blank";
+// LOGIN
+function doAdminLogin() {
+  const p = document.getElementById("adminPass").value;
+  if (p === MASTER_KEY) {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("mainApp").style.display     = "block";
+    loadWithdrawals("Pending");
+  } else {
+    Swal.fire({icon:"error",title:"Galat Password",text:"Dobara try karen.",confirmButtonColor:"#fbbf24"});
+  }
+}
+function doLogout() {
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("mainApp").style.display     = "none";
+  document.getElementById("adminPass").value = "";
+}
+
+// TABS
+function switchTab(name, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  btn.classList.add("active");
+}
+
+// WITHDRAWALS
+async function loadWithdrawals(filterStatus) {
+  const el = document.getElementById("wd-list");
+  el.innerHTML = '<div class="empty"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    const res  = await fetch(GAS + "?type=get_all_withdrawals&key=" + MASTER_KEY + "&status=" + filterStatus);
+    const data = await res.json();
+    if (data.status !== "success" || !data.withdrawals || !data.withdrawals.length) {
+      el.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i>' + filterStatus + ' withdrawal nahi mili</div>'; return;
     }
-})();
+    let html = '<div style="margin-bottom:12px;font-size:13px;color:var(--sub);padding:0 4px;">' + data.withdrawals.length + ' records</div>';
+    data.withdrawals.forEach(function(w) {
+      const fee  = parseFloat(w.fee||0).toFixed(2);
+      const net  = parseFloat(w.net_amount||w.amount).toFixed(2);
+      const date = new Date(w.date||0).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+      const bc   = w.status==="Approved"?"b-approved":w.status==="Rejected"?"b-rejected":"b-pending";
+      html += '<div class="wd-item">'
+        + '<div class="wd-top">'
+        + '<div><div class="wd-name">' + _e(w.name||"Unknown") + '</div><div class="wd-id">' + _e(w.user_id) + ' &nbsp;|&nbsp; ' + date + '</div></div>'
+        + '<div><div class="wd-amount">Rs. ' + parseFloat(w.amount||0).toFixed(2) + '</div><div class="wd-net">Net: Rs. ' + net + '</div></div>'
+        + '</div>'
+        + '<div class="wd-meta">'
+        + '<div>Account Type<b>' + _e(w.account_type||"—") + '</b></div>'
+        + '<div>Account No<b>' + _e(w.account_no||"—") + '</b></div>'
+        + '<div>Title<b>' + _e(w.account_title||"—") + '</b></div>'
+        + '<div>Fee / Status<b>Rs.' + fee + ' <span class="badge ' + bc + '">' + w.status + '</span></b></div>'
+        + '</div>';
+      if (w.status === "Pending") {
+        html += '<div class="wd-actions">'
+          + '<button class="btn btn-green" style="padding:10px" onclick="wdAction(\'' + (w.req_id||"") + '\',\'' + w.user_id + '\',' + (w.amount||0) + ',\'Approved\')"><i class="fas fa-check"></i> Approve</button>'
+          + '<button class="btn btn-red" style="padding:10px" onclick="wdAction(\'' + (w.req_id||"") + '\',\'' + w.user_id + '\',' + (w.amount||0) + ',\'Rejected\')"><i class="fas fa-times"></i> Reject</button>'
+          + '</div>';
+      }
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><i class="fas fa-wifi"></i> Connection failed</div>';
+  }
+}
 
-// --- 1. SEND FUNDS ---
+async function wdAction(reqId, userId, amount, newStatus) {
+  const conf = await Swal.fire({
+    title: newStatus==="Approved" ? "✅ Approve Karen?" : "❌ Reject Karen?",
+    html: "<b>" + userId + "</b> — Rs. " + amount,
+    icon: newStatus==="Approved" ? "question" : "warning",
+    showCancelButton:true,
+    confirmButtonColor: newStatus==="Approved" ? "#22c55e" : "#ef4444",
+    cancelButtonColor:"#64748b",
+    confirmButtonText: newStatus,
+    cancelButtonText: "Cancel"
+  });
+  if (!conf.isConfirmed) return;
+  Swal.fire({title:"Processing...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action:"update_withdrawal", key:MASTER_KEY, req_id:reqId, user_id:userId, amount:amount, status:newStatus})
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      Swal.fire("✅ Done!", newStatus + " ho gaya.", "success");
+      loadWithdrawals("Pending");
+    } else { Swal.fire("Error", data.message, "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// FUND
 async function sendFunds() {
-    const uid = document.getElementById("credit-uid").value.trim().toUpperCase();
-    const amt = document.getElementById("credit-amt").value;
-    const type = document.getElementById("credit-type").value;
-
-    if(!uid || !amt) return Swal.fire("Error", "Fill all fields", "error");
-
-    Swal.fire({title: 'Processing...', didOpen: () => Swal.showLoading()});
-    await fetch(API, {
-        method: "POST",
-        body: JSON.stringify({ key: MASTER_KEY, action: "manual_credit", user_id: uid, amount: parseFloat(amt), type: type })
+  const uid  = document.getElementById("c-uid").value.trim().toUpperCase();
+  const amt  = parseFloat(document.getElementById("c-amt").value);
+  const type = document.getElementById("c-type").value;
+  const note = document.getElementById("c-note").value.trim();
+  if (!uid || !amt || amt <= 0) return Swal.fire("Error","User ID aur Amount bharen","error");
+  Swal.fire({title:"Sending...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action:"manual_credit", key:MASTER_KEY, user_id:uid, amount:amt, type, note})
     });
-    Swal.fire("Success", `${amt} credited as ${type}`, "success");
+    const data = await res.json();
+    if (data.status === "success") {
+      Swal.fire("✅ Sent!", "Rs. " + amt + " (" + type + ") → " + uid + "\nNew Balance: Rs. " + (data.new_balance||"—"), "success");
+      document.getElementById("c-uid").value = "";
+      document.getElementById("c-amt").value = "";
+      document.getElementById("c-note").value = "";
+    } else { Swal.fire("Error", data.message, "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
 }
 
-// --- 2. SEARCH USER ---
+async function deductFunds() {
+  const uid    = document.getElementById("d-uid").value.trim().toUpperCase();
+  const amt    = parseFloat(document.getElementById("d-amt").value);
+  const reason = document.getElementById("d-reason").value.trim();
+  if (!uid || !amt || amt <= 0) return Swal.fire("Error","User ID aur Amount bharen","error");
+  const conf = await Swal.fire({title:"Deduct?",text:uid+" se Rs."+amt+" deduct?",icon:"warning",showCancelButton:true,confirmButtonColor:"#ef4444"});
+  if (!conf.isConfirmed) return;
+  Swal.fire({title:"Processing...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action:"manual_deduct", key:MASTER_KEY, user_id:uid, amount:amt, reason})
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      Swal.fire("✅ Done!", "Rs. " + amt + " deduct.\nNew Balance: Rs. " + (data.new_balance||"—"), "success");
+    } else { Swal.fire("Error", data.message, "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// USER
 async function findUser() {
-    const sid = document.getElementById("search-id").value.trim().toUpperCase();
-    const res = await fetch(API);
+  const q = document.getElementById("s-uid").value.trim().toUpperCase();
+  if (!q) return Swal.fire("Error","User ID bharen","error");
+  Swal.fire({title:"Searching...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS + "?type=get_user&userId=" + encodeURIComponent(q));
     const data = await res.json();
-    const user = data.users.find(u => u.user_id === sid);
-    const box = document.getElementById("search-result");
-    box.style.display = "block";
-    if(user) {
-        box.innerHTML = `<b style="color:var(--gold)">Name:</b> ${user.name}<br><b>Phone:</b> ${user.number}<br><b>Balance:</b> Rs. ${user.balance}<br><b>Device:</b> ${user.device_id.slice(0,10)}...`;
-    } else {
-        box.innerHTML = "<span style='color:red'>Not Found</span>";
+    Swal.close();
+    if (data.status !== "success") { Swal.fire("Not Found", data.message, "error"); return; }
+    const u = data.user;
+    const el = document.getElementById("user-result");
+    el.style.display = "block";
+    el.innerHTML = [
+      ["Name",    u.name||"—"],
+      ["User ID", u.user_id||"—"],
+      ["Phone",   u.number||"—"],
+      ["Balance", "Rs. "+parseFloat(u.balance||0).toFixed(2)],
+      ["Status",  u.status||"active"],
+      ["Referral",u.referral||"DIRECT"],
+      ["Account", (u.account_type||"—")+" — "+(u.account_no||"—")],
+      ["Joined",  u.joined_at ? new Date(u.joined_at).toLocaleDateString("en-GB") : "—"],
+    ].map(r => '<div class="user-row"><span class="lbl">'+r[0]+'</span><span class="val">'+_e(String(r[1]))+'</span></div>').join("");
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+async function unlockUser() {
+  const uid = document.getElementById("ul-uid").value.trim().toUpperCase();
+  if (!uid) return Swal.fire("Error","User ID bharen","error");
+  Swal.fire({title:"Unlocking...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"unlock_device",key:MASTER_KEY,user_id:uid})});
+    const data = await res.json();
+    if (data.status==="success") Swal.fire("✅ Unlocked!",uid+" ka device clear ho gaya.","success");
+    else Swal.fire("Error",data.message,"error");
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+async function setStatus(status) {
+  const uid = document.getElementById("bl-uid").value.trim().toUpperCase();
+  if (!uid) return Swal.fire("Error","User ID bharen","error");
+  Swal.fire({title:"Processing...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"set_status",key:MASTER_KEY,user_id:uid,status})});
+    const data = await res.json();
+    if (data.status==="success") Swal.fire("✅ Done!",uid+" ko "+status+" kar diya.","success");
+    else Swal.fire("Error",data.message,"error");
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+async function resetPassword() {
+  const uid  = document.getElementById("rp-uid").value.trim().toUpperCase();
+  const pass = document.getElementById("rp-pass").value.trim();
+  if (!uid||!pass) return Swal.fire("Error","User ID aur Password bharen","error");
+  Swal.fire({title:"Resetting...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({action:"reset_password",key:MASTER_KEY,user_id:uid,new_password:pass})});
+    const data = await res.json();
+    if (data.status==="success") Swal.fire("✅ Done!",uid+" ka password reset ho gaya.","success");
+    else Swal.fire("Error",data.message,"error");
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// SETTINGS
+async function updateSettings(mode) {
+  let payload = {action:"update_settings", key:MASTER_KEY};
+  if (mode==="news") {
+    const news = document.getElementById("news-text").value.trim();
+    if (!news) return Swal.fire("Error","News bharen","error");
+    payload.news = news;
+  } else {
+    const mLink = document.getElementById("m-link").value.trim();
+    if (!mLink) return Swal.fire("Error","Media URL bharen","error");
+    payload.media_type = document.getElementById("m-type").value;
+    payload.media_link = mLink;
+  }
+  Swal.fire({title:"Saving...",allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  try {
+    const res  = await fetch(GAS,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data = await res.json();
+    if (data.status==="success") Swal.fire("✅ Saved!","Update ho gaya.","success");
+    else Swal.fire("Error",data.message,"error");
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// STATS
+async function loadStats() {
+  ["st-total","st-active","st-pending","st-approved"].forEach(id=>document.getElementById(id).textContent="...");
+  try {
+    const res  = await fetch(GAS+"?type=get_stats&key="+MASTER_KEY);
+    const data = await res.json();
+    if (data.status==="success") {
+      document.getElementById("st-total").textContent   = data.total_users  || 0;
+      document.getElementById("st-active").textContent  = data.active_users || 0;
+      document.getElementById("st-pending").textContent  = data.pending_wd  || 0;
+      document.getElementById("st-approved").textContent = data.approved_wd || 0;
     }
+  } catch(e) {}
 }
 
-// --- 3. WITHDRAWAL LOGIC ---
-async function loadPendingWdr() {
-    const res = await fetch(API);
-    const data = await res.json();
-    const pending = data.withdrawals.filter(w => w.status === "Pending");
-    const container = document.getElementById("wdr-list");
-    container.innerHTML = pending.length ? "" : "No pending requests.";
-    
-    pending.forEach(w => {
-        const div = document.createElement("div");
-        div.className = "wdr-item";
-        div.innerHTML = `
-            <b>ID: ${w.user_id}</b> | <span style="color:var(--gold)">Rs. ${w.amount}</span><br>
-            <small>${w.method} - ${w.date}</small>
-            <div style="display:flex; gap:5px; margin-top:10px;">
-                <button onclick="wdrAction('${w.user_id}', ${w.amount}, 'Approved')" style="flex:1; background:#22c55e; border:none; border-radius:4px; font-weight:bold; padding:5px;">Approve</button>
-                <button onclick="wdrAction('${w.user_id}', ${w.amount}, 'Rejected')" style="flex:1; background:#ef4444; color:white; border:none; border-radius:4px; font-weight:bold; padding:5px;">Reject</button>
-            </div>`;
-        container.appendChild(div);
-    });
-}
-
-async function wdrAction(uid, amt, status) {
-    Swal.fire({title: 'Updating...', didOpen: () => Swal.showLoading()});
-    await fetch(API, {
-        method: "POST",
-        body: JSON.stringify({ key: MASTER_KEY, action: "update_withdrawal", user_id: uid, amount: amt, status: status })
-    });
-    Swal.fire(status, `Request ${status}`, "success");
-    loadPendingWdr();
-}
-
-// --- 4. DASHBOARD UPDATE ---
-async function updateDashboard() {
-    const news = document.getElementById("dash-news").value;
-    const mType = document.getElementById("media-type").value;
-    const mLink = document.getElementById("media-val").value;
-
-    Swal.fire({title: 'Updating Dashboard...', didOpen: () => Swal.showLoading()});
-    await fetch(API, {
-        method: "POST",
-        body: JSON.stringify({ key: MASTER_KEY, action: "update_dashboard", news: news, media_type: mType, media_link: mLink })
-    });
-    Swal.fire("Success", "Dashboard content updated", "success");
-}
+function _e(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 </script>
 </body>
-  </html>
+</html>
