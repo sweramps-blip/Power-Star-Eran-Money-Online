@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Activity | Power Star</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+(function(){
+  var u=localStorage.getItem("psUser")||localStorage.getItem("ps_user");
+  if(!u||localStorage.getItem("psLoggedIn")!=="true"){window.location.replace("auth.html");return;}
+  try{window.CU=JSON.parse(u);}catch(e){localStorage.clear();window.location.replace("auth.html");}
+})();
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{
+  height:100%;
+  font-family:'Nunito',sans-serif;
+  background:#070b14;
+  color:#fff;
+  overflow-x:hidden;
+}
+
+/* ═══ TOPBAR ═══ */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;
+  background:rgba(7,11,20,0.98);
+  position:sticky;top:0;z-index:99;
+}
+.back-btn{
+  width:40px;height:40px;border-radius:14px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;
+  color:#94a3b8;font-size:16px;text-decoration:none;
+}
+.back-btn:active{opacity:.7;}
+.logo-txt{font-size:18px;font-weight:900;letter-spacing:.5px;}
+.logo-txt span{color:#fbbf24;}
+.notif-btn{
+  width:40px;height:40px;border-radius:14px;
+  background:rgba(251,191,36,0.08);
+  border:1px solid rgba(251,191,36,0.15);
+  display:flex;align-items:center;justify-content:center;
+  color:#fbbf24;font-size:16px;
+}
+
+/* ═══ SCROLL BODY ═══ */
+.scroll-body{
+  padding:0 16px 110px;
+  overflow-y:auto;
+}
+
+/* ═══ HERO BALANCE CARD ═══ */
+.hero-card{
+  margin:16px 0 20px;
+  border-radius:28px;
+  padding:28px 24px;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(140deg,#1a2035 0%,#0d1424 100%);
+  border:1px solid rgba(251,191,36,0.18);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(251,191,36,0.12);
+}
+.hero-card::before{
+  content:'';position:absolute;
+  top:-60px;right:-60px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(251,191,36,0.12) 0%,transparent 65%);
+}
+.hero-card::after{
+  content:'';position:absolute;
+  bottom:-40px;left:-20px;
+  width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,0.07) 0%,transparent 65%);
+}
+.hc-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.hc-lbl{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;}
+.hc-star{
+  width:44px;height:44px;border-radius:14px;
+  background:linear-gradient(135deg,#fbbf24,#d97706);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:#0a0e1a;
+  box-shadow:0 8px 20px rgba(251,191,36,0.35);
+  position:relative;z-index:1;
+}
+.hc-amount{
+  font-size:42px;font-weight:900;
+  color:#fff;line-height:1;
+  letter-spacing:-1px;
+  position:relative;z-index:1;
+}
+.hc-amount sup{font-size:18px;font-weight:800;vertical-align:super;color:#fbbf24;margin-right:2px;}
+.hc-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:16px;position:relative;z-index:1;}
+.hc-id{
+  background:rgba(251,191,36,0.1);
+  border:1px solid rgba(251,191,36,0.2);
+  border-radius:8px;padding:5px 12px;
+  font-size:11px;font-weight:800;color:#fbbf24;letter-spacing:.5px;
+}
+.hc-dots{display:flex;gap:5px;}
+.hc-dot{width:6px;height:6px;border-radius:50%;}
+
+/* ═══ GREETING ═══ */
+.greet-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.greet-left .greet-hi{font-size:13px;font-weight:700;color:#64748b;}
+.greet-left .greet-name{font-size:20px;font-weight:900;color:#fff;margin-top:1px;}
+.greet-badge{
+  background:rgba(34,197,94,0.1);
+  border:1px solid rgba(34,197,94,0.25);
+  border-radius:20px;padding:6px 12px;
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:800;color:#4ade80;
+}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:#22c55e;
+  box-shadow:0 0 8px #22c55e;
+  animation:blink 1.6s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ═══ SECTION HEADER ═══ */
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.sec-hdr h3{font-size:16px;font-weight:900;color:#fff;}
+.sec-hdr span{font-size:11px;font-weight:700;color:#64748b;}
+
+/* ═══ ACTIVITY CARDS ═══ */
+.act-list{display:flex;flex-direction:column;gap:12px;}
+
+.act-card{
+  display:flex;align-items:center;
+  border-radius:22px;padding:18px 16px;
+  text-decoration:none;
+  position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.06);
+  transition:transform .15s;
+  gap:16px;
+}
+.act-card:active{transform:scale(0.97);}
+
+/* CARD 1 - VIDEO - Red/Orange */
+.c1{background:linear-gradient(135deg,#1f0a0a 0%,#2a0d0d 50%,#1a0808 100%);}
+.c1::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,0.2),transparent 65%);}
+.c1{border-color:rgba(239,68,68,0.2);}
+
+/* CARD 2 - QUIZ - Gold */
+.c2{background:linear-gradient(135deg,#1f1500 0%,#2a1c00 50%,#1a1100 100%);}
+.c2::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,0.2),transparent 65%);}
+.c2{border-color:rgba(251,191,36,0.2);}
+
+/* CARD 3 - PLAY - Purple */
+.c3{background:linear-gradient(135deg,#100a1f 0%,#160d2a 50%,#0d0818 100%);}
+.c3::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,0.2),transparent 65%);}
+.c3{border-color:rgba(168,85,247,0.2);}
+
+/* CARD 4 - SHARE - Green */
+.c4{background:linear-gradient(135deg,#051a0a 0%,#082212 50%,#041508 100%);}
+.c4::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,0.2),transparent 65%);}
+.c4{border-color:rgba(34,197,94,0.2);}
+
+/* ICON CIRCLE */
+.card-icon{
+  width:60px;height:60px;min-width:60px;
+  border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  position:relative;z-index:1;
+  flex-shrink:0;
+}
+.c1 .card-icon{background:rgba(239,68,68,0.15);border:1.5px solid rgba(239,68,68,0.3);color:#f87171;box-shadow:0 8px 24px rgba(239,68,68,0.2);}
+.c2 .card-icon{background:rgba(251,191,36,0.12);border:1.5px solid rgba(251,191,36,0.3);color:#fde68a;box-shadow:0 8px 24px rgba(251,191,36,0.2);}
+.c3 .card-icon{background:rgba(168,85,247,0.12);border:1.5px solid rgba(168,85,247,0.3);color:#d8b4fe;box-shadow:0 8px 24px rgba(168,85,247,0.2);}
+.c4 .card-icon{background:rgba(34,197,94,0.1);border:1.5px solid rgba(34,197,94,0.3);color:#86efac;box-shadow:0 8px 24px rgba(34,197,94,0.18);}
+
+/* CARD TEXT */
+.card-text{flex:1;position:relative;z-index:1;}
+.card-num{font-size:9.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.45;margin-bottom:3px;}
+.card-title{font-size:19px;font-weight:900;color:#fff;line-height:1.1;margin-bottom:4px;}
+.card-desc{font-size:11.5px;font-weight:600;color:#475569;line-height:1.5;}
+
+/* CARD RIGHT */
+.card-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;position:relative;z-index:1;flex-shrink:0;}
+.card-badge{
+  font-size:8.5px;font-weight:800;letter-spacing:.8px;
+  padding:4px 10px;border-radius:20px;text-transform:uppercase;
+}
+.c1 .card-badge{background:rgba(239,68,68,0.18);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+.c2 .card-badge{background:rgba(251,191,36,0.15);color:#fde68a;border:1px solid rgba(251,191,36,0.3);}
+.c3 .card-badge{background:rgba(168,85,247,0.15);color:#d8b4fe;border:1px solid rgba(168,85,247,0.3);}
+.c4 .card-badge{background:rgba(34,197,94,0.12);color:#86efac;border:1px solid rgba(34,197,94,0.3);}
+
+.arrow-btn{
+  width:36px;height:36px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.c1 .arrow-btn{background:rgba(239,68,68,0.12);color:#f87171;}
+.c2 .arrow-btn{background:rgba(251,191,36,0.12);color:#fde68a;}
+.c3 .arrow-btn{background:rgba(168,85,247,0.12);color:#d8b4fe;}
+.c4 .arrow-btn{background:rgba(34,197,94,0.10);color:#86efac;}
+
+/* ═══ STATS MINI ROW ═══ */
+.stats-row{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:10px;margin-bottom:20px;
+}
+.stat-mini{
+  background:#0d1220;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:18px;padding:14px 16px;
+}
+.sm-lbl{font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.sm-val{font-size:22px;font-weight:900;line-height:1;}
+.sm-sub{font-size:10px;font-weight:700;color:#64748b;margin-top:3px;}
+
+/* ═══ NAV BAR ═══ */
+.nav-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:rgba(7,11,20,0.98);
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:10px 0 18px;
+  display:flex;justify-content:space-around;
+}
+.nav-link{
+  display:flex;flex-direction:column;align-items:center;
+  gap:4px;text-decoration:none;
+  color:#334155;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.5px;
+  transition:color .2s;
+  padding:0 12px;
+}
+.nav-link i{font-size:22px;}
+.nav-link.active{color:#fbbf24;}
+.nav-link.active i{filter:drop-shadow(0 0 6px rgba(251,191,36,0.6));}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.hero-card{animation:fadeUp .4s ease both;}
+.greet-row{animation:fadeUp .4s .06s ease both;}
+.stats-row{animation:fadeUp .4s .10s ease both;}
+.sec-hdr{animation:fadeUp .4s .14s ease both;}
+.c1{animation:fadeUp .4s .18s ease both;}
+.c2{animation:fadeUp .4s .24s ease both;}
+.c3{animation:fadeUp .4s .30s ease both;}
+.c4{animation:fadeUp .4s .36s ease both;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+  <div class="logo-txt">POWER <span>STAR</span></div>
+  <div class="notif-btn"><i class="fas fa-bell"></i></div>
+</div>
+
+<div class="scroll-body">
+
+  <!-- HERO BALANCE CARD -->
+  <div class="hero-card">
+    <div class="hc-row1">
+      <span class="hc-lbl">Available Balance</span>
+      <div class="hc-star"><i class="fas fa-star"></i></div>
+    </div>
+    <div class="hc-amount"><sup>Rs.</sup><span id="main-bal">0.00</span></div>
+    <div class="hc-bottom">
+      <div class="hc-id" id="main-id">ID: ——</div>
+      <div class="hc-dots">
+        <div class="hc-dot" style="background:#fbbf24;"></div>
+        <div class="hc-dot" style="background:rgba(251,191,36,0.4);"></div>
+        <div class="hc-dot" style="background:rgba(251,191,36,0.15);"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GREETING -->
+  <div class="greet-row">
+    <div class="greet-left">
+      <div class="greet-hi">Hello 👋</div>
+      <div class="greet-name" id="g-name">Loading...</div>
+    </div>
+    <div class="greet-badge">
+      <div class="live-dot"></div>
+      Online
+    </div>
+  </div>
+
+  <!-- MINI STATS -->
+  <div class="stats-row">
+    <div class="stat-mini">
+      <div class="sm-lbl">Activities</div>
+      <div class="sm-val" style="color:#fbbf24;">4</div>
+      <div class="sm-sub">Available now</div>
+    </div>
+    <div class="stat-mini">
+      <div class="sm-lbl">Today Earn</div>
+      <div class="sm-val" style="color:#22c55e;">Rs.<span id="today-earn">0.00</span></div>
+      <div class="sm-sub">Keep going!</div>
+    </div>
+  </div>
+
+  <!-- SECTION HEADER -->
+  <div class="sec-hdr">
+    <h3>Choose Activity</h3>
+    <span>4 available</span>
+  </div>
+
+  <!-- ACTIVITY LIST -->
+  <div class="act-list">
+
+    <!-- 01 WATCH VIDEOS -->
+    <a href="video.html" class="act-card c1">
+      <div class="card-icon"><i class="fas fa-circle-play"></i></div>
+      <div class="card-text">
+        <div class="card-num">01 &nbsp;·&nbsp; Watch</div>
+        <div class="card-title">Watch Videos</div>
+        <div class="card-desc">Videos dekh kar har video pe<br>Rs. 1.50 instantly earn karo</div>
+      </div>
+      <div class="card-right">
+        <span class="card-badge">🔥 HOT</span>
+        <div class="arrow-btn"><i class="fas fa-chevron-right"></i></div>
+      </div>
+    </a>
+
+    <!-- 02 QUIZ & EARN -->
+    <a href="eran.html" class="act-card c2">
+      <div class="card-icon"><i class="fas fa-lightbulb"></i></div>
+      <div class="card-text">
+        <div class="card-num">02 &nbsp;·&nbsp; Quiz</div>
+        <div class="card-title">Quiz &amp; Earn</div>
+        <div class="card-desc">Sawalo ke sahi jawab de<br>aur rozana Rs. cashback lo</div>
+      </div>
+      <div class="card-right">
+        <span class="card-badge">⚡ DAILY</span>
+        <div class="arrow-btn"><i class="fas fa-chevron-right"></i></div>
+      </div>
+    </a>
+
+    <!-- 03 PLAY & EARN -->
+    <a href="mega.html" class="act-card c3">
+      <div class="card-icon"><i class="fas fa-gamepad"></i></div>
+      <div class="card-text">
+        <div class="card-num">03 &nbsp;·&nbsp; Game</div>
+        <div class="card-title">Play &amp; Earn</div>
+        <div class="card-desc">Word Search khelo, coins<br>jeetao aur balance banao</div>
+      </div>
+      <div class="card-right">
+        <span class="card-badge">🎮 FUN</span>
+        <div class="arrow-btn"><i class="fas fa-chevron-right"></i></div>
+      </div>
+    </a>
+
+    <!-- 04 SHARE & EARN -->
+    <a href="share.html" class="act-card c4">
+      <div class="card-icon"><i class="fas fa-share-nodes"></i></div>
+      <div class="card-text">
+        <div class="card-num">04 &nbsp;·&nbsp; Referral</div>
+        <div class="card-title">Share &amp; Earn</div>
+        <div class="card-desc">Friends ko invite karo<br>aur referral bonus kamao</div>
+      </div>
+      <div class="card-right">
+        <span class="card-badge">✨ NEW</span>
+        <div class="arrow-btn"><i class="fas fa-chevron-right"></i></div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<nav class="nav-bar">
+  <a href="dashboard.html" class="nav-link"><i class="fas fa-house"></i>Home</a>
+  <a href="activity.html" class="nav-link active"><i class="fas fa-bolt-lightning"></i>Activity</a>
+  <a href="team.html" class="nav-link"><i class="fas fa-users"></i>Team</a>
+  <a href="wallet.html" class="nav-link"><i class="fas fa-wallet"></i>Wallet</a>
+</nav>
+
+<script>
+(function(){
+  try{
+    var u   = window.CU || JSON.parse(localStorage.getItem("psUser")||localStorage.getItem("ps_user")||"{}");
+    var bal = parseFloat(u.balance||0).toFixed(2);
+    document.getElementById("g-name").textContent    = u.name    || "User";
+    document.getElementById("main-bal").textContent  = bal;
+    document.getElementById("main-id").textContent   = "ID: " + (u.user_id||"——");
+
+    // Today earned from localStorage
+    var todayKey = "psVid_"+(u.user_id||"")+"_"+new Date().toDateString();
+    var watched  = JSON.parse(localStorage.getItem(todayKey)||"[]").length;
+    var vidEarn  = (watched * 1.50).toFixed(2);
+    document.getElementById("today-earn").textContent = vidEarn;
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
