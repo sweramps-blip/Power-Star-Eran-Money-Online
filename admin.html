@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Power Star | Admin Panel</title>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#fbbf24;--gold2:#f59e0b;--bg:#0a0e1a;--card:#131829;--border:#1e2a45;--text:#94a3b8;--green:#22c55e;--red:#ef4444;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;font-family:'Outfit',sans-serif;background:var(--bg);color:#fff;}
+body{padding:0 0 60px;}
+
+/* ── LOGIN OVERLAY (black screen fix) ── */
+#login-overlay{
+  position:fixed;inset:0;background:#0a0e1a;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+}
+#login-overlay .logo{font-size:48px;}
+#login-overlay h2{font-size:22px;font-weight:800;letter-spacing:1px;}
+#login-overlay h2 span{color:var(--gold);}
+#login-overlay p{font-size:13px;color:var(--text);}
+.pw-box{
+  width:100%;max-width:340px;background:var(--card);
+  border:1px solid var(--border);border-radius:20px;padding:28px 22px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.pw-label{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.7px;}
+.pw-input-wrap{position:relative;}
+.pw-input{
+  width:100%;padding:13px 44px 13px 14px;
+  background:#0a0e1a;border:1.5px solid var(--border);
+  border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;
+  font-size:15px;outline:none;transition:.25s;
+}
+.pw-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.15);}
+.pw-eye{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text);font-size:15px;cursor:pointer;}
+.login-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;border-radius:12px;color:#000;
+  font-size:16px;font-weight:800;cursor:pointer;
+  font-family:'Outfit',sans-serif;transition:.2s;
+}
+.login-btn:active{transform:scale(.97);}
+#login-error{color:var(--red);font-size:13px;text-align:center;display:none;}
+#login-loading{color:var(--gold);font-size:13px;text-align:center;display:none;}
+
+/* ── MAIN PANEL (hidden until login) ── */
+#main-panel{display:none;}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#131829;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.top-bar h2{font-size:18px;font-weight:800;}
+.top-bar h2 span{color:var(--gold);}
+.logout-btn{background:rgba(239,68,68,.12);border:1px solid var(--red);color:var(--red);padding:7px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;padding:14px 14px 0;overflow-x:auto;}
+.tab-btn{flex-shrink:0;padding:9px 16px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap;font-family:'Outfit',sans-serif;}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#000;border-color:transparent;}
+
+/* CONTENT */
+.content{padding:14px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:14px;border-top:3px solid var(--gold);}
+.card h3{color:var(--gold);font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+label{display:block;font-size:11px;color:var(--text);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px;}
+input,select,textarea{width:100%;padding:12px 14px;background:#0a0e1a;border:1.5px solid var(--border);border-radius:11px;color:#fff;font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:.2s;margin-bottom:14px;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.12);}
+textarea{height:80px;resize:vertical;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;color:#000;transition:.2s;margin-top:2px;font-family:'Outfit',sans-serif;}
+.btn:active{transform:scale(.97);}
+.btn.white{background:#fff;}
+.btn.outline-red{background:transparent;border:1px solid var(--red);color:var(--red);}
+
+/* STATS */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;}
+.stat-num{font-size:22px;font-weight:800;color:var(--gold);}
+.stat-lbl{font-size:11px;color:var(--text);margin-top:3px;}
+
+/* WITHDRAWAL ITEM */
+.wdr-item{background:#0a0e1a;border:1px solid var(--border);border-left:3px solid var(--gold);padding:14px;border-radius:12px;margin-bottom:10px;}
+.wdr-name{font-size:15px;font-weight:700;margin-bottom:2px;}
+.wdr-amount{font-size:20px;font-weight:800;color:var(--gold);margin:6px 0;}
+.wdr-meta{color:var(--text);font-size:12px;line-height:1.9;}
+.wdr-actions{display:flex;gap:8px;margin-top:12px;}
+.approve-btn{flex:1;padding:10px;background:rgba(34,197,94,.15);border:1px solid var(--green);color:var(--green);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;}
+.reject-btn{flex:1;padding:10px;background:rgba(239,68,68,.15);border:1px solid var(--red);color:var(--red);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* USER BOX */
+.user-box{background:#0a0e1a;border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px;display:none;font-size:13px;}
+.user-box table{width:100%;border-collapse:collapse;}
+.user-box td{padding:6px 0;border-bottom:1px solid rgba(30,42,69,.5);}
+.user-box td:first-child{color:var(--text);width:40%;}
+.user-box td:last-child{font-weight:700;text-align:right;}
+.u-name{font-size:17px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.u-bal{font-size:22px;font-weight:900;color:var(--green);margin-bottom:10px;}
+
+/* SEARCH ROW */
+.search-row{display:flex;gap:8px;margin-bottom:14px;}
+.search-row input{margin-bottom:0;flex:1;}
+.find-btn{flex-shrink:0;padding:0 20px;background:var(--gold);border:none;border-radius:11px;font-weight:700;color:#000;cursor:pointer;font-size:14px;font-family:'Outfit',sans-serif;}
+
+/* MISC */
+.empty-msg{text-align:center;padding:30px;color:var(--text);font-size:14px;}
+.loading-msg{text-align:center;padding:20px;color:var(--text);}
+.refresh-icon{margin-left:auto;cursor:pointer;color:var(--text);font-size:14px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LOGIN OVERLAY — Hamesha visible
+     Black screen fix: body hidden nahi
+══════════════════════════════════════ -->
+<div id="login-overlay">
+  <div class="logo">⚡</div>
+  <h2>POWER <span>STAR</span> ADMIN</h2>
+  <p>Admin password enter karein</p>
+
+  <div class="pw-box">
+    <div>
+      <label>Password</label>
+      <div class="pw-input-wrap">
+        <input type="password" id="pw-field" class="pw-input"
+               placeholder="••••••••••"
+               onkeydown="if(event.key==='Enter') doAdminLogin()">
+        <button class="pw-eye" onclick="togglePwEye()" type="button" id="pw-eye-btn">
+          <i class="fas fa-eye" id="pw-eye-icon"></i>
+        </button>
+      </div>
+    </div>
+    <div id="login-error"><i class="fas fa-times-circle"></i> <span id="error-msg">Wrong password</span></div>
+    <div id="login-loading"><i class="fas fa-spinner fa-spin"></i> Verifying...</div>
+    <button class="login-btn" onclick="doAdminLogin()">
+      <i class="fas fa-right-to-bracket"></i> Login
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN ADMIN PANEL
+══════════════════════════════════════ -->
+<div id="main-panel">
+
+  <div class="top-bar">
+    <h2>⚡ POWER <span>STAR</span> ADMIN</h2>
+    <button class="logout-btn" onclick="adminLogout()">
+      <i class="fas fa-right-from-bracket"></i> Logout
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('withdrawals',this)"><i class="fas fa-receipt"></i> Withdrawals</button>
+    <button class="tab-btn" onclick="switchTab('funds',this)"><i class="fas fa-coins"></i> Send Funds</button>
+    <button class="tab-btn" onclick="switchTab('search',this)"><i class="fas fa-search"></i> Find User</button>
+    <button class="tab-btn" onclick="switchTab('settings',this)"><i class="fas fa-cog"></i> Dashboard</button>
+  </div>
+
+  <div class="content">
+
+    <!-- TAB 1: WITHDRAWALS -->
+    <div class="tab-panel active" id="tab-withdrawals">
+      <div class="stat-row" id="wdr-stats" style="display:none;">
+        <div class="stat-box"><div class="stat-num" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:var(--green)" id="stat-approved">0</div><div class="stat-lbl">Approved</div></div>
+        <div class="stat-box"><div class="stat-num" style="color:var(--red)" id="stat-rejected">0</div><div class="stat-lbl">Rejected</div></div>
+      </div>
+      <div class="card">
+        <h3>
+          <i class="fas fa-clock"></i> Pending Requests
+          <span class="refresh-icon" onclick="loadWithdrawals()"><i class="fas fa-rotate-right"></i></span>
+        </h3>
+        <div id="wdr-list"><div class="loading-msg"><i class="fas fa-spinner fa-spin"></i> Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SEND FUNDS -->
+    <div class="tab-panel" id="tab-funds">
+      <div class="card">
+        <h3><i class="fas fa-coins"></i> Credit User Wallet</h3>
+        <label>User ID</label>
+        <input type="text" id="credit-uid" placeholder="PS0001" oninput="this.value=this.value.toUpperCase()">
+        <div class="grid2">
+          <div><label>Amount (PKR)</label><input type="number" id="credit-amt" placeholder="500"></div>
+          <div>
+            <label>Type</label>
+            <select id="credit-type">
+              <option value="Salary">Salary</option>
+              <option value="Commission">Commission</option>
+              <option value="Reward">Reward</option>
+              <option value="Bonus">Bonus</option>
+            </select>
+          </div>
+        </div>
+        <label>Note (optional)</label>
+        <input type="text" id="credit-note" placeholder="e.g. March 2026 Salary">
+        <button class="btn" onclick="sendFunds()"><i class="fas fa-paper-plane"></i> Credit Wallet</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: FIND USER -->
+    <div class="tab-panel" id="tab-search">
+      <div class="card">
+        <h3><i class="fas fa-search"></i> Find User</h3>
+        <div class="search-row">
+          <input type="text" id="search-id" placeholder="PS0001" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter') findUser()">
+          <button class="find-btn" onclick="findUser()"><i class="fas fa-search"></i> Find</button>
+        </div>
+        <div class="user-box" id="user-result"></div>
+      </div>
+      <div class="card" id="user-actions-card" style="display:none;">
+        <h3><i class="fas fa-tools"></i> User Actions</h3>
+        <button class="btn white" style="margin-bottom:10px;" onclick="unlockUserDevice()"><i class="fas fa-unlock"></i> Unlock Device</button>
+        <button class="btn outline-red" onclick="blockUser()"><i class="fas fa-ban"></i> Block / Unblock</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: DASHBOARD -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="card">
+        <h3><i class="fas fa-tv"></i> Dashboard Content</h3>
+        <label>Scrolling News Text</label>
+        <textarea id="dash-news" placeholder="Users ke liye latest updates..."></textarea>
+        <div class="grid2">
+          <div>
+            <label>Media Type</label>
+            <select id="media-type"><option value="image">Image</option><option value="video">Video</option></select>
+          </div>
+          <div>
+            <label>Media URL</label>
+            <input type="text" id="media-val" placeholder="URL paste karein">
+          </div>
+        </div>
+        <div>
+            <label>Popup Message (Sab Users Ko Dikhega)</label>
+            <textarea id="popup-msg" placeholder="Admin notice ya koi bhi message users ke liye..."></textarea>
+          </div>
+        <button class="btn white" onclick="updateDashboard()"><i class="fas fa-save"></i> Save & Update</button>
+      </div>
+    </div>
+
+  </div><!-- .content -->
+</div><!-- #main-panel -->
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbxSF7kNSn0aJkuuDVVMVchE_5lPrKVCRW2jem9YoV1lrBt9QZuQZeXiReM6OgBwBgQB/exec";
+let SK = "";
+
+// ══ PASSWORD EYE TOGGLE
+function togglePwEye() {
+  const f = document.getElementById("pw-field");
+  const i = document.getElementById("pw-eye-icon");
+  if (f.type === "password") { f.type = "text";     i.className = "fas fa-eye-slash"; }
+  else                       { f.type = "password"; i.className = "fas fa-eye"; }
+}
+
+// ══ CHECK SESSION ON LOAD
+window.addEventListener("load", function() {
+  const saved = sessionStorage.getItem("ps_sk");
+  if (saved) { SK = saved; showPanel(); }
+  // else: overlay already visible, user enters password
+});
+
+// ══ ADMIN LOGIN
+async function doAdminLogin() {
+  const pw  = document.getElementById("pw-field").value.trim();
+  const err = document.getElementById("login-error");
+  const ldr = document.getElementById("login-loading");
+
+  if (!pw) {
+    document.getElementById("error-msg").innerText = "Password enter karein";
+    err.style.display = "block"; return;
+  }
+
+  err.style.display = "none";
+  ldr.style.display = "block";
+  document.querySelector(".login-btn").disabled = true;
+
+  try {
+    const res  = await fetch(API, {
+      method : "POST",
+      body   : JSON.stringify({ action:"admin_login", password:pw })
+    });
+    const data = await res.json();
+
+    ldr.style.display = "none";
+    document.querySelector(".login-btn").disabled = false;
+
+    if (data.status === "success") {
+      SK = data.session_key;
+      sessionStorage.setItem("ps_sk", SK);
+      showPanel();
+    } else {
+      document.getElementById("error-msg").innerText = data.message || "Wrong password";
+      err.style.display = "block";
+      document.getElementById("pw-field").value = "";
+      document.getElementById("pw-field").focus();
+    }
+  } catch(e) {
+    ldr.style.display = "none";
+    document.querySelector(".login-btn").disabled = false;
+    document.getElementById("error-msg").innerText = "Connection failed. Try again.";
+    err.style.display = "block";
+  }
+}
+
+// ══ SHOW MAIN PANEL
+function showPanel() {
+  document.getElementById("login-overlay").style.display = "none";
+  document.getElementById("main-panel").style.display    = "block";
+  loadWithdrawals();
+}
+
+// ══ LOGOUT
+function adminLogout() {
+  sessionStorage.removeItem("ps_sk");
+  SK = "";
+  document.getElementById("main-panel").style.display    = "none";
+  document.getElementById("login-overlay").style.display = "flex";
+  document.getElementById("pw-field").value = "";
+  document.getElementById("login-error").style.display   = "none";
+}
+
+// ══ TABS
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab-panel").forEach(function(p){ p.classList.remove("active"); });
+  document.querySelectorAll(".tab-btn").forEach(function(b){ b.classList.remove("active"); });
+  document.getElementById("tab-"+name).classList.add("active");
+  if (btn) btn.classList.add("active");
+  if (name === "withdrawals") loadWithdrawals();
+}
+
+// ══ LOAD WITHDRAWALS
+async function loadWithdrawals() {
+  const list = document.getElementById("wdr-list");
+  list.innerHTML = '<div class="loading-msg"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+  try {
+    const res  = await fetch(API + "?type=get_all_withdrawals&key=" + encodeURIComponent(SK));
+    const data = await res.json();
+
+    if (data.status !== "success") {
+      list.innerHTML = '<div class="empty-msg" style="color:var(--red);">' + (data.message||"Load failed") + '</div>'; return;
+    }
+
+    const all      = data.withdrawals || [];
+    const pending  = all.filter(function(w){ return w.status === "Pending"; });
+    const approved = all.filter(function(w){ return w.status === "Approved"; });
+    const rejected = all.filter(function(w){ return w.status === "Rejected"; });
+
+    document.getElementById("stat-pending").textContent  = pending.length;
+    document.getElementById("stat-approved").textContent = approved.length;
+    document.getElementById("stat-rejected").textContent = rejected.length;
+    document.getElementById("wdr-stats").style.display   = "grid";
+
+    if (!pending.length) {
+      list.innerHTML = '<div class="empty-msg"><i class="fas fa-check-circle" style="font-size:36px;color:var(--green);display:block;margin-bottom:8px;"></i>No pending requests</div>'; return;
+    }
+
+    list.innerHTML = "";
+    pending.forEach(function(w) {
+      const date = w.date ? new Date(w.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}) : "—";
+      const d    = document.createElement("div");
+      d.className = "wdr-item";
+      d.innerHTML =
+        '<div class="wdr-name">' + _e(w.name||w.user_id) + ' <span style="color:var(--text);font-size:11px;font-weight:400;">(' + _e(w.user_id) + ')</span></div>'
+      + '<div class="wdr-amount">Rs. ' + parseFloat(w.amount||0).toFixed(2) + '</div>'
+      + '<div class="wdr-meta">'
+      + '<b>Net:</b> Rs. ' + parseFloat(w.net_amount||w.amount||0).toFixed(2) + ' &nbsp;|&nbsp; <b>Fee:</b> Rs. ' + parseFloat(w.fee||0).toFixed(2) + '<br>'
+      + '<b>Account:</b> ' + _e(w.account_no||"—") + ' (' + _e(w.account_type||"—") + ')<br>'
+      + '<b>Title:</b> '   + _e(w.account_title||"—") + '<br>'
+      + '<b>Date:</b> '    + date
+      + '</div>'
+      + '<div class="wdr-actions">'
+      + '<button class="approve-btn" onclick="wdrAction(\'' + _e(w.req_id) + '\',\'' + _e(w.user_id) + '\',' + parseFloat(w.amount||0) + ',\'Approved\')"><i class="fas fa-check"></i> Approve</button>'
+      + '<button class="reject-btn"  onclick="wdrAction(\'' + _e(w.req_id) + '\',\'' + _e(w.user_id) + '\',' + parseFloat(w.amount||0) + ',\'Rejected\')"><i class="fas fa-times"></i> Reject</button>'
+      + '</div>';
+      list.appendChild(d);
+    });
+  } catch(e) {
+    list.innerHTML = '<div class="empty-msg" style="color:var(--red);"><i class="fas fa-wifi"></i> Connection failed</div>';
+  }
+}
+
+// ══ APPROVE / REJECT
+async function wdrAction(reqId, userId, amount, status) {
+  const r = await Swal.fire({
+    title: status + " karna hai?",
+    text : userId + " — Rs. " + amount,
+    icon : status === "Approved" ? "success" : "warning",
+    showCancelButton:true, confirmButtonText:status,
+    confirmButtonColor: status === "Approved" ? "#22c55e" : "#ef4444",
+    background:"#131829", color:"#fff"
+  });
+  if (!r.isConfirmed) return;
+  Swal.fire({ title:"Updating...", didOpen:function(){ Swal.showLoading(); }, background:"#131829", color:"#fff" });
+  try {
+    const res  = await fetch(API, {
+      method:"POST",
+      body: JSON.stringify({ action:"update_withdrawal", key:SK, req_id:reqId, user_id:userId, amount:amount, status:status })
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      Swal.fire({ title:"Done!", text:"Request " + status, icon:"success", timer:1600, showConfirmButton:false, background:"#131829", color:"#fff" });
+      setTimeout(loadWithdrawals, 1700);
+    } else { Swal.fire("Error", data.message||"Failed", "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// ══ SEND FUNDS
+async function sendFunds() {
+  const uid  = document.getElementById("credit-uid").value.trim();
+  const amt  = parseFloat(document.getElementById("credit-amt").value);
+  const type = document.getElementById("credit-type").value;
+  const note = document.getElementById("credit-note").value.trim();
+  if (!uid || !amt || amt <= 0)
+    return Swal.fire({ title:"Error", text:"User ID aur Amount bharen", icon:"error", background:"#131829", color:"#fff" });
+  const r = await Swal.fire({
+    title:"Confirm", text:"Rs. " + amt + " (" + type + ") → " + uid,
+    icon:"question", showCancelButton:true, confirmButtonText:"Credit",
+    confirmButtonColor:"#fbbf24", background:"#131829", color:"#fff"
+  });
+  if (!r.isConfirmed) return;
+  Swal.fire({ title:"Processing...", didOpen:function(){ Swal.showLoading(); }, background:"#131829", color:"#fff" });
+  try {
+    const res  = await fetch(API, {
+      method:"POST",
+      body: JSON.stringify({ action:"manual_credit", key:SK, user_id:uid, amount:amt, type:type, note:note })
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      document.getElementById("credit-uid").value  = "";
+      document.getElementById("credit-amt").value  = "";
+      document.getElementById("credit-note").value = "";
+      Swal.fire({ title:"Credited! ✅", text:"New Balance: Rs. " + parseFloat(data.new_balance).toFixed(2), icon:"success", background:"#131829", color:"#fff" });
+    } else { Swal.fire("Error", data.message||"Failed", "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+// ══ FIND USER
+async function findUser() {
+  const uid = document.getElementById("search-id").value.trim();
+  if (!uid) return;
+  const box = document.getElementById("user-result");
+  box.style.display = "block";
+  box.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+  try {
+    const res  = await fetch(API + "?type=get_user&userId=" + encodeURIComponent(uid));
+    const data = await res.json();
+    if (data.status !== "success") {
+      box.innerHTML = '<span style="color:var(--red)">Not found: ' + _e(uid) + '</span>';
+      document.getElementById("user-actions-card").style.display = "none"; return;
+    }
+    const u  = data.user;
+    const sc = (u.status||"active").toLowerCase() === "active" ? "var(--green)" : "var(--red)";
+    box.innerHTML =
+      '<div class="u-name">' + _e(u.name||"Unknown") + '</div>'
+    + '<div class="u-bal">Rs. ' + parseFloat(u.balance||0).toFixed(2) + '</div>'
+    + '<table>'
+    + '<tr><td>User ID</td><td>'  + _e(u.user_id) + '</td></tr>'
+    + '<tr><td>Phone</td><td>'    + _e(u.number||"—") + '</td></tr>'
+    + '<tr><td>Referral</td><td>' + _e(u.referral||"DIRECT") + '</td></tr>'
+    + '<tr><td>Account</td><td>'  + _e(u.account_type||"—") + ' — ' + _e(u.account_no||"Not set") + '</td></tr>'
+    + '<tr><td>Title</td><td>'    + _e(u.account_title||"—") + '</td></tr>'
+    + '<tr><td>Joined</td><td>'   + (u.joined_at ? new Date(u.joined_at).toLocaleDateString("en-GB") : "—") + '</td></tr>'
+    + '<tr><td>Status</td><td style="color:' + sc + '">' + _e(u.status||"active") + '</td></tr>'
+    + '<tr><td>Device</td><td style="font-size:11px;">' + (u.device_id ? _e(u.device_id.substring(0,16))+"..." : '<span style="color:var(--text)">Not set</span>') + '</td></tr>'
+    + '</table>';
+    window._fuid = u.user_id;
+    document.getElementById("user-actions-card").style.display = "block";
+  } catch(e) { box.innerHTML = '<span style="color:var(--red)">Connection failed</span>'; }
+}
+
+async function unlockUserDevice() {
+  const uid = window._fuid; if (!uid) return;
+  Swal.fire({ title:"Unlocking...", didOpen:function(){ Swal.showLoading(); }, background:"#131829", color:"#fff" });
+  try {
+    await fetch(API, { method:"POST",
+      body: JSON.stringify({ action:"unlock_device", key:SK, user_id:uid }) });
+    Swal.fire({ title:"Done! ✅", text:uid + " ka device unlock ho gaya", icon:"success", background:"#131829", color:"#fff" });
+  } catch(e) { Swal.fire("Error","Failed","error"); }
+}
+
+async function blockUser() {
+  const uid = window._fuid; if (!uid) return;
+  const r = await Swal.fire({
+    title:"Block/Unblock", text:"User " + uid + " ka status toggle?",
+    icon:"warning", showCancelButton:true, confirmButtonText:"Confirm",
+    background:"#131829", color:"#fff"
+  });
+  if (!r.isConfirmed) return;
+  Swal.fire({ title:"Updating...", didOpen:function(){ Swal.showLoading(); }, background:"#131829", color:"#fff" });
+  const res  = await fetch(API, { method:"POST",
+    body: JSON.stringify({ action:"toggle_block", key:SK, user_id:uid }) });
+  const data = await res.json();
+  Swal.fire({ title:"Done!", text:"Status: " + (data.new_status||"updated"), icon:"success", background:"#131829", color:"#fff" });
+  findUser();
+}
+
+// ══ UPDATE DASHBOARD
+async function updateDashboard() {
+  const news  = document.getElementById("dash-news").value.trim();
+  const mType = document.getElementById("media-type").value;
+  const mLink = document.getElementById("media-val").value.trim();
+  if (!news && !mLink)
+    return Swal.fire({ title:"Error", text:"Kuch to bharen", icon:"error", background:"#131829", color:"#fff" });
+  Swal.fire({ title:"Saving...", didOpen:function(){ Swal.showLoading(); }, background:"#131829", color:"#fff" });
+  try {
+    const res  = await fetch(API, {
+      method:"POST",
+      body: JSON.stringify({ action:"update_dashboard", key:SK, news:news, media_type:mType, media_link:mLink, popup_message:document.getElementById("popup-msg").value.trim() })
+    });
+    const data = await res.json();
+    if (data.status === "success") {
+      Swal.fire({ title:"Updated! ✅", icon:"success", timer:1500, showConfirmButton:false, background:"#131829", color:"#fff" });
+    } else { Swal.fire("Error", data.message||"Failed", "error"); }
+  } catch(e) { Swal.fire("Error","Connection failed","error"); }
+}
+
+function _e(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+</script>
+</body>
+</html>
