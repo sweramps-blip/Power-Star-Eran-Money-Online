@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Power Star | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- ✅ AUTH GUARD -->
+    <script>
+    (function() {
+        var newKey  = localStorage.getItem("psUser");
+        var oldKey  = localStorage.getItem("ps_user");
+        if (newKey && !oldKey) { localStorage.setItem("ps_user", newKey); oldKey = newKey; }
+        if (oldKey && !newKey) { localStorage.setItem("psUser", oldKey); localStorage.setItem("psLoggedIn","true"); }
+        var userData = oldKey || newKey;
+        if (!userData) { window.location.replace("auth.html"); }
+    })();
+    </script>
+
+    <style>
+        :root {
+            --gold: #fbbf24; --gold-dark: #d97706; --bg: #0a0e1a;
+            --card: #1a1f35; --border: #2d3548; --card-dark: #151929;
+            --text-secondary: #94a3b8;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:#fff; padding-bottom:100px; overflow-x:hidden; }
+
+        /* HEADER */
+        .header { padding:16px 20px; background:#131829; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+        .header-row { display:flex; justify-content:space-between; align-items:center; }
+        .logo-text { font-weight:800; font-size:22px; }
+        .logo-text span { color:var(--gold); }
+        .header-icons { display:flex; gap:16px; align-items:center; }
+
+        /* USER META */
+        .user-meta { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; background:#0f1423; font-size:12px; border-bottom:1px solid var(--border); }
+        .id-badge { background:rgba(251,191,36,0.1); color:var(--gold); padding:4px 12px; border-radius:8px; border:1px solid rgba(251,191,36,0.3); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; }
+
+        /* BALANCE CARD */
+        .balance-card { background:linear-gradient(135deg,var(--gold) 0%,var(--gold-dark) 100%); padding:28px 25px; border-radius:24px; margin:20px; box-shadow:0 15px 40px rgba(217,119,6,0.25); text-align:center; position:relative; }
+        .history-icon { position:absolute; right:20px; top:20px; color:#000; background:rgba(255,255,255,0.2); padding:10px; border-radius:50%; cursor:pointer; font-size:16px; transition:0.2s; }
+        .history-icon:hover { background:rgba(255,255,255,0.35); }
+        .bal-label { font-size:12px; font-weight:700; opacity:0.75; color:#0a0e1a; letter-spacing:1px; text-transform:uppercase; }
+        .bal-amount { font-size:38px; font-weight:900; color:#0a0e1a; margin:6px 0 14px; }
+        .income-btn { background:rgba(0,0,0,0.12); border:1.5px solid rgba(0,0,0,0.2); color:#0a0e1a; padding:10px 22px; border-radius:12px; font-weight:800; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+
+        /* NEWS BOX */
+        .news-box { margin:0 20px 22px; background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.25); padding:10px 14px; border-radius:12px; display:flex; align-items:center; gap:10px; }
+        .news-badge { background:var(--gold); color:#000; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:800; white-space:nowrap; }
+        .news-box marquee { font-size:13px; font-weight:600; color:#fff; flex:1; }
+
+        /* SECTION TITLE */
+        .section-title { font-size:11px; font-weight:800; color:var(--gold); margin:4px 20px 14px; display:flex; align-items:center; gap:8px; text-transform:uppercase; letter-spacing:1.2px; }
+
+        /* 4 FEATURE BUTTONS */
+        .feature-grid { display:grid; grid-template-columns:1fr 1fr; gap:13px; margin:0 20px; }
+        .feature-btn {
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:11px; padding:24px 12px; border-radius:20px; cursor:pointer;
+            text-decoration:none; border:none; transition:transform 0.15s, box-shadow 0.15s;
+            position:relative; overflow:hidden;
+        }
+        .feature-btn:active { transform:scale(0.94); }
+        .feature-btn .btn-icon { font-size:30px; }
+        .feature-btn .btn-label { font-size:12px; font-weight:800; color:#fff; text-align:center; line-height:1.4; }
+        .btn-glow { position:absolute; width:90px; height:90px; border-radius:50%; opacity:0.10; top:-25px; right:-20px; }
+
+        /* Company Profile */
+        .btn-company { background:linear-gradient(145deg,#1a2f5e,#0c1a3a); border:1.5px solid rgba(59,130,246,0.4); box-shadow:0 8px 24px rgba(59,130,246,0.18); }
+        .btn-company .btn-glow { background:#3b82f6; }
+        .btn-company .btn-icon { color:#93c5fd; }
+
+        /* Telegram */
+        .btn-telegram { background:linear-gradient(145deg,#082c50,#041b33); border:1.5px solid rgba(0,136,204,0.4); box-shadow:0 8px 24px rgba(0,136,204,0.18); }
+        .btn-telegram .btn-glow { background:#0088cc; }
+        .btn-telegram .btn-icon { color:#38bdf8; }
+
+        /* WhatsApp */
+        .btn-whatsapp { background:linear-gradient(145deg,#082c1a,#041a10); border:1.5px solid rgba(37,211,102,0.4); box-shadow:0 8px 24px rgba(37,211,102,0.18); }
+        .btn-whatsapp .btn-glow { background:#25d366; }
+        .btn-whatsapp .btn-icon { color:#4ade80; }
+
+        /* YouTube */
+        .btn-youtube { background:linear-gradient(145deg,#3b0808,#230404); border:1.5px solid rgba(255,0,0,0.4); box-shadow:0 8px 24px rgba(255,0,0,0.18); }
+        .btn-youtube .btn-glow { background:#ff0000; }
+        .btn-youtube .btn-icon { color:#fca5a5; }
+
+        /* NAV BAR */
+        .nav-bar { position:fixed; bottom:0; width:100%; background:#131829; display:flex; justify-content:space-around; padding:12px 0; border-top:1px solid var(--border); z-index:1000; }
+        .nav-link { color:var(--text-secondary); text-decoration:none; font-size:10px; text-align:center; transition:color 0.2s; }
+        .nav-link i { font-size:20px; display:block; margin-bottom:4px; }
+        .nav-link.active { color:var(--gold); }
+
+        /* HISTORY MODAL */
+        .history-modal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; }
+        .history-modal.show { display:flex; }
+        .history-content { background:var(--card); border-radius:20px; border:1px solid var(--border); max-width:500px; width:100%; max-height:80vh; overflow-y:auto; position:relative; }
+        .history-header { padding:20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--card); z-index:1; }
+        .history-header h3 { font-size:18px; font-weight:800; color:var(--gold); }
+        .close-modal { background:rgba(239,68,68,0.1); border:1px solid #ef4444; color:#ef4444; padding:6px 14px; border-radius:8px; cursor:pointer; font-size:12px; }
+        .history-body { padding:15px 20px; }
+        .history-item { background:var(--card-dark); padding:14px; border-radius:12px; margin-bottom:10px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+        .history-type { font-size:14px; font-weight:700; color:#fff; }
+        .history-amount { font-size:16px; font-weight:900; color:var(--gold); }
+
+        /* ADMIN POPUP MODAL */
+        .popup-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.88); z-index:99999; align-items:center; justify-content:center; padding:24px; }
+        .popup-overlay.show { display:flex; }
+        .popup-box { background:var(--card); border-radius:24px; border:2px solid rgba(251,191,36,0.4); max-width:420px; width:100%; overflow:hidden; animation:popIn 0.3s ease; box-shadow:0 20px 60px rgba(0,0,0,0.6); }
+        @keyframes popIn { from{transform:scale(0.82);opacity:0} to{transform:scale(1);opacity:1} }
+        .popup-header { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); padding:18px 22px; display:flex; align-items:center; gap:12px; }
+        .popup-header i { font-size:22px; color:#0a0e1a; }
+        .popup-header h3 { font-size:16px; font-weight:800; color:#0a0e1a; margin:0; }
+        .popup-body { padding:22px 22px 16px; font-size:14px; color:#e2e8f0; line-height:1.85; white-space:pre-line; }
+        .popup-footer { padding:0 22px 22px; }
+        .popup-ok-btn { width:100%; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); border:none; color:#0a0e1a; font-weight:800; font-size:15px; padding:14px; border-radius:14px; cursor:pointer; }
+
+        /* ══════════════════════════════════════
+           FLOATING CHAT BUTTON
+        ══════════════════════════════════════ */
+        .chat-fab {
+            position:fixed;
+            bottom:80px;
+            right:18px;
+            width:56px;
+            height:56px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#3b82f6,#1d4ed8);
+            border:none;
+            cursor:pointer;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            box-shadow:0 6px 22px rgba(59,130,246,0.50);
+            z-index:999;
+            text-decoration:none;
+            transition:transform 0.18s, box-shadow 0.18s;
+            animation:fabPulse 2.5s infinite;
+        }
+        .chat-fab:active { transform:scale(0.91); }
+        @keyframes fabPulse {
+            0%,100% { box-shadow:0 6px 22px rgba(59,130,246,0.50); }
+            50%      { box-shadow:0 6px 30px rgba(59,130,246,0.80); }
+        }
+        .chat-fab i { color:#fff; font-size:22px; }
+
+        /* Unread badge on FAB */
+        .fab-badge {
+            position:absolute;
+            top:-3px;
+            right:-3px;
+            background:#ef4444;
+            color:#fff;
+            font-size:10px;
+            font-weight:800;
+            min-width:18px;
+            height:18px;
+            border-radius:9px;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            padding:0 4px;
+            border:2px solid var(--bg);
+            font-family:'Inter',sans-serif;
+        }
+        .fab-badge.show { display:flex; }
+
+        /* Chat tooltip */
+        .fab-tooltip {
+            position:absolute;
+            right:64px;
+            background:#1a1f35;
+            border:1px solid rgba(59,130,246,0.35);
+            color:#fff;
+            font-size:12px;
+            font-weight:700;
+            padding:7px 12px;
+            border-radius:10px;
+            white-space:nowrap;
+            pointer-events:none;
+            opacity:0;
+            transform:translateX(6px);
+            transition:opacity .25s, transform .25s;
+            font-family:'Inter',sans-serif;
+        }
+        .chat-fab:hover .fab-tooltip,
+        .chat-fab.show-tip .fab-tooltip {
+            opacity:1;
+            transform:translateX(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-row">
+            <div class="logo-text">POWER <span>STAR</span></div>
+            <div class="header-icons">
+                <!-- Headset icon — chat.html se link -->
+                <a href="chat.html" style="color:var(--gold);font-size:18px;cursor:pointer;text-decoration:none;">
+                    <i class="fa-solid fa-headset"></i>
+                </a>
+                <i class="fa-solid fa-right-from-bracket" onclick="logout()" style="color:#ef4444;font-size:18px;cursor:pointer;"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER META -->
+    <div class="user-meta">
+        <span id="u-name" style="font-weight:600;color:var(--text-secondary);">Loading...</span>
+        <div class="id-badge" onclick="copyID()">
+            <span id="u-id">PS####</span>
+            <i class="fa-regular fa-copy" style="font-size:10px;opacity:0.8;"></i>
+        </div>
+    </div>
+
+    <!-- BALANCE CARD -->
+    <div class="balance-card">
+        <div class="history-icon" onclick="openHistory()">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <p class="bal-label">Available Balance</p>
+        <h1 class="bal-amount">Rs. <span id="u-bal">0.00</span></h1>
+        <div class="income-btn" onclick="showIncome()">
+            <i class="fa-solid fa-sack-dollar"></i> View Income
+        </div>
+    </div>
+
+    <!-- NEWS BOX -->
+    <div class="news-box">
+        <span class="news-badge">NEWS</span>
+        <marquee id="news-text">Syncing with server...</marquee>
+    </div>
+
+    <!-- SECTION TITLE -->
+    <div class="section-title">
+        <i class="fa-solid fa-grid-2"></i> Quick Access
+    </div>
+
+    <!-- 4 FEATURE BUTTONS -->
+    <div class="feature-grid">
+
+        <a href="index.html" class="feature-btn btn-company">
+            <div class="btn-glow"></div>
+            <div class="btn-icon"><i class="fa-solid fa-building-columns"></i></div>
+            <div class="btn-label">Company<br>Profile</div>
+        </a>
+
+        <a href="https://t.me/+wrV-LempJ39lY2Fk" target="_blank" class="feature-btn btn-telegram">
+            <div class="btn-glow"></div>
+            <div class="btn-icon"><i class="fa-brands fa-telegram"></i></div>
+            <div class="btn-label">Join Telegram<br>Group</div>
+        </a>
+
+        <a href="https://whatsapp.com/channel/0029VbBtlLd29752E8E2z10W" target="_blank" class="feature-btn btn-whatsapp">
+            <div class="btn-glow"></div>
+            <div class="btn-icon"><i class="fa-brands fa-whatsapp"></i></div>
+            <div class="btn-label">Follow WhatsApp<br>Channel</div>
+        </a>
+
+        <a href="https://youtube.com/@PowerStarOfficial" target="_blank" class="feature-btn btn-youtube">
+            <div class="btn-glow"></div>
+            <div class="btn-icon"><i class="fa-brands fa-youtube"></i></div>
+            <div class="btn-label">YouTube<br>Channel</div>
+        </a>
+
+    </div>
+
+    <!-- NAV BAR -->
+    <nav class="nav-bar">
+        <a href="dashboard.html" class="nav-link active"><i class="fa-solid fa-house"></i>Home</a>
+        <a href="activity.html" class="nav-link"><i class="fa-solid fa-bolt-lightning"></i>Activity</a>
+        <a href="team.html" class="nav-link"><i class="fa-solid fa-users-viewfinder"></i>Team</a>
+        <a href="wallet.html" class="nav-link"><i class="fa-solid fa-wallet"></i>Wallet</a>
+    </nav>
+
+    <!-- ══ FLOATING CHAT BUTTON ══ -->
+    <a href="chat.html" class="chat-fab" id="chat-fab">
+        <i class="fa-solid fa-headset"></i>
+        <span class="fab-badge" id="fab-badge">!</span>
+        <span class="fab-tooltip">Support Chat</span>
+    </a>
+
+    <!-- HISTORY MODAL -->
+    <div class="history-modal" id="history-modal">
+        <div class="history-content">
+            <div class="history-header">
+                <h3><i class="fa-solid fa-history"></i> Transaction History</h3>
+                <button class="close-modal" onclick="closeHistory()">CLOSE</button>
+            </div>
+            <div class="history-body" id="history-body">
+                <p style="text-align:center;color:#64748b;padding:30px;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN POPUP MODAL -->
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="popup-box">
+            <div class="popup-header">
+                <i class="fa-solid fa-bell"></i>
+                <h3>Important Notice</h3>
+            </div>
+            <div class="popup-body" id="popup-body"></div>
+            <div class="popup-footer">
+                <button class="popup-ok-btn" onclick="closePopup()">
+                    <i class="fa-solid fa-check-circle"></i>&nbsp; Got It!
+                </button>
+            </div>
+        </div>
+    </div>
+
+<script>
+const API_URL        = "https://script.google.com/macros/s/AKfycbxSgkzYuWaUoeIVQsa76jWWKMRfRnygn0a0Q8SyQfMmbk5Ri6SNO4WGYA9FXQIa8XjQ/exec";
+const CACHE_SETTINGS = "ps_cached_settings";
+const CACHE_TIME     = "ps_cache_ts";
+const CACHE_TTL      = 5 * 60 * 1000;
+
+function getUser() {
+    try { return JSON.parse(localStorage.getItem("psUser") || localStorage.getItem("ps_user") || "null"); }
+    catch(e) { return null; }
+}
+
+function renderUser(u) {
+    if (!u) return;
+    document.getElementById("u-name").innerText = u.name    || "User";
+    document.getElementById("u-id").innerText   = u.user_id || "PS####";
+    document.getElementById("u-bal").innerText  = parseFloat(u.balance || 0).toFixed(2);
+}
+
+function renderSettings(s) {
+    if (!s) return;
+    // ✅ NEWS — Firebase se aata hai (handleUpdateDashboard se set hota hai)
+    if (s.news) {
+        const nm = document.getElementById("news-text");
+        if (nm) nm.innerHTML = s.news;
+    }
+    // ✅ POPUP MESSAGE — Firebase se aata hai, session mein ek baar dikhata hai
+    if (s.popup_message && s.popup_message.trim()) {
+        const msgKey = "ps_popup_" + s.popup_message.length + "_" + s.popup_message.charCodeAt(0);
+        if (!sessionStorage.getItem(msgKey)) {
+            document.getElementById("popup-body").innerText = s.popup_message;
+            document.getElementById("popup-overlay").classList.add("show");
+            sessionStorage.setItem(msgKey, "1");
+        }
+    }
+}
+
+function closePopup() {
+    document.getElementById("popup-overlay").classList.remove("show");
+}
+
+async function syncDashboard() {
+    const localUser = getUser();
+    if (!localUser) { window.location.replace("auth.html"); return; }
+    renderUser(localUser);
+
+    try {
+        const cachedSettings = JSON.parse(localStorage.getItem(CACHE_SETTINGS) || "null");
+        if (cachedSettings) renderSettings(cachedSettings);
+    } catch(e) {}
+
+    const lastFetch = parseInt(localStorage.getItem(CACHE_TIME) || "0");
+    const now = Date.now();
+    if ((now - lastFetch) < CACHE_TTL) return;
+
+    try {
+        const res  = await fetch(API_URL + "?type=get_dashboard&userId=" + encodeURIComponent(localUser.user_id || ""));
+        const data = await res.json();
+        if (data.status === "success") {
+            if (data.user) {
+                const merged = Object.assign({}, localUser, data.user);
+                localStorage.setItem("psUser",  JSON.stringify(merged));
+                localStorage.setItem("ps_user", JSON.stringify(merged));
+                localStorage.setItem("psID",    merged.user_id);
+                renderUser(merged);
+            }
+            if (data.settings) {
+                localStorage.setItem(CACHE_SETTINGS, JSON.stringify(data.settings));
+                renderSettings(data.settings);
+            }
+            localStorage.setItem(CACHE_TIME, String(now));
+        }
+    } catch(e) { console.log("Sync failed:", e.message); }
+}
+
+async function openHistory() {
+    document.getElementById("history-modal").classList.add("show");
+    const hb = document.getElementById("history-body");
+    try {
+        const cached = JSON.parse(localStorage.getItem("ps_cached_history") || "null");
+        if (cached && cached.length) {
+            renderHistory(hb, cached);
+            const localUser = getUser();
+            if (localUser) {
+                fetch(API_URL + "?type=get_history&userId=" + encodeURIComponent(localUser.user_id || ""))
+                .then(r => r.json()).then(data => {
+                    if (data.status === "success" && data.history && data.history.length) {
+                        localStorage.setItem("ps_cached_history", JSON.stringify(data.history));
+                        renderHistory(hb, data.history);
+                    }
+                }).catch(() => {});
+            }
+            return;
+        }
+    } catch(e) {}
+    hb.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Loading...</p>';
+    const localUser = getUser();
+    if (!localUser) return;
+    try {
+        const res  = await fetch(API_URL + "?type=get_history&userId=" + encodeURIComponent(localUser.user_id || ""));
+        const data = await res.json();
+        if (data.status !== "success" || !data.history || !data.history.length) {
+            hb.innerHTML = '<p style="text-align:center;padding:30px;color:#64748b;">No history yet.</p>'; return;
+        }
+        localStorage.setItem("ps_cached_history", JSON.stringify(data.history));
+        renderHistory(hb, data.history);
+    } catch(e) { hb.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">Load failed.</p>'; }
+}
+
+function renderHistory(hb, list) {
+    const colorMap = {"Salary":"#22c55e","Commission":"#3b82f6","Reward":"#a855f7","Bonus":"#f97316","Withdrawal":"#fbbf24","Rejected":"#ef4444","Deduction":"#ef4444"};
+    let html = "";
+    list.forEach(function(h) {
+        const color = colorMap[h.type] || "#94a3b8";
+        const sign  = (h.type==="Withdrawal"||h.type==="Rejected"||h.type==="Deduction") ? "- " : "+ ";
+        const date  = new Date(h.date).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+        html += '<div class="history-item"><div><div class="history-type">'+(h.title||h.type)+'</div><div style="font-size:11px;color:#64748b;margin-top:3px;">'+date+'</div></div><div style="text-align:right"><div class="history-amount" style="color:'+color+'">'+sign+'Rs. '+parseFloat(h.amount).toFixed(2)+'</div>'+(h.status?'<div style="font-size:11px;font-weight:700;color:'+color+'">'+h.status+'</div>':'')+'</div></div>';
+    });
+    hb.innerHTML = html;
+}
+
+function closeHistory() {
+    document.getElementById("history-modal").classList.remove("show");
+    localStorage.removeItem("ps_cached_history");
+}
+
+function showIncome() {
+    const user = getUser();
+    Swal.fire({
+        title: '<strong>💰 Your Income</strong>',
+        html: '<div style="text-align:left;padding:10px;"><p><b>Balance:</b> Rs. '+parseFloat(user.balance||0).toFixed(2)+'</p><p><b>User ID:</b> '+user.user_id+'</p></div>',
+        icon: 'info', confirmButtonColor: '#fbbf24'
+    });
+}
+
+function logout() {
+    ["ps_user","psUser","psLoggedIn","psID","ps_cached_settings","ps_cached_history","ps_cache_ts"].forEach(k => localStorage.removeItem(k));
+    window.location.replace("auth.html");
+}
+
+function copyID() {
+    const idText = document.getElementById("u-id").innerText;
+    navigator.clipboard.writeText(idText).then(() => {
+        Swal.mixin({ toast:true, position:'top-end', showConfirmButton:false, timer:2000, background:'#1a1f35', color:'#fff' })
+        .fire({ icon:'success', title:'ID Copied: '+idText });
+    });
+}
+
+async function prefetchHistory() {
+    const localUser = getUser();
+    if (!localUser || !localUser.user_id) return;
+    try {
+        const res  = await fetch(API_URL+'?type=get_history&userId='+encodeURIComponent(localUser.user_id));
+        const data = await res.json();
+        if (data.status === 'success' && data.history && data.history.length) {
+            localStorage.setItem('ps_cached_history', JSON.stringify(data.history));
+        }
+    } catch(e) {}
+}
+
+// ══════════════════════════════════════
+//  CHAT FAB — unread check (har 30s)
+// ══════════════════════════════════════
+async function checkUnreadMessages() {
+    const user = getUser();
+    if (!user || !user.user_id) return;
+    try {
+        const res  = await fetch(API_URL + "?type=get_messages&userId=" + encodeURIComponent(user.user_id));
+        const data = await res.json();
+        if (data.status === "success" && data.messages) {
+            // Admin ka koi unread message hai?
+            var lastSeen = parseInt(localStorage.getItem("ps_chat_seen") || "0");
+            var adminMsgs = data.messages.filter(function(m){
+                return (m.sender||"").toLowerCase() === "admin";
+            });
+            var latest = adminMsgs.length ? new Date(adminMsgs[adminMsgs.length-1].timestamp||0).getTime() : 0;
+            var badge = document.getElementById("fab-badge");
+            if (latest > lastSeen && adminMsgs.length > 0) {
+                badge.classList.add("show");
+                // Tooltip show karo thodi der
+                var fab = document.getElementById("chat-fab");
+                fab.classList.add("show-tip");
+                setTimeout(function(){ fab.classList.remove("show-tip"); }, 3000);
+            } else {
+                badge.classList.remove("show");
+            }
+        }
+    } catch(e) {}
+}
+
+// Chat pe click hone par seen mark karo
+document.getElementById("chat-fab").addEventListener("click", function(){
+    localStorage.setItem("ps_chat_seen", String(Date.now()));
+    document.getElementById("fab-badge").classList.remove("show");
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    syncDashboard();
+    setTimeout(prefetchHistory, 1500);
+    // Unread check — 5 second baad aur phir har 30 second mein
+    setTimeout(checkUnreadMessages, 5000);
+    setInterval(checkUnreadMessages, 30000);
+});
+</script>
+</body>
+</html>
